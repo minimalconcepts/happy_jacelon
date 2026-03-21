@@ -22,6 +22,8 @@ canvas.width = window.innerWidth
 
 function resizeCanvas(){
 
+dpr = window.devicePixelRatio || 1
+
 canvas.width = window.innerWidth * dpr
 canvas.height = window.innerHeight * dpr
 
@@ -37,7 +39,6 @@ textCtx.scale(dpr,dpr)
 resetMatrix()
 
 }
-
 window.addEventListener("resize",resizeCanvas)
 
 const textCanvas = document.getElementById("textCanvas")
@@ -76,6 +77,27 @@ drops[i]=0
 
 drops[i]++
 
+}
+
+}
+
+/*soporte para celular*/
+function rebuildScene(){
+
+// limpiar partículas
+particlesTexto = []
+particlesBorde = []
+
+// limpiar canvas
+ctx.clearRect(0,0,canvas.width,canvas.height)
+textCtx.clearRect(0,0,textCanvas.width,textCanvas.height)
+
+// reiniciar matrix
+resetMatrix()
+
+// volver a dibujar lo que iba
+if(fraseActual < frases.length){
+createTextParticles(frases[fraseActual])
 }
 
 }
@@ -212,8 +234,10 @@ S:[
 }
 function animateLEDWord(word){
 
-const size = 20
-const spacing = 10
+let isMobile = window.innerWidth < 600
+
+const size = isMobile ? 12 : 20
+const spacing = isMobile ? 6 : 10
 
 const letterWidth = 3*(size+spacing)
 const startX = textCanvas.width/2 - (word.length*letterWidth)/2
@@ -388,8 +412,10 @@ function startParticles(){
 particlesTexto = []
 particlesBorde = []
 
-let total = 3000
-let textoCount = 2500
+let isMobile = window.innerWidth < 600
+
+let total = isMobile ? 1500 : 2500
+let textoCount = isMobile ? 700 : 1200
 
 for(let i = 0; i < total; i++){
 
@@ -481,7 +507,8 @@ bufferCanvas.height = window.innerHeight
 bufferCtx.clearRect(0,0,bufferCanvas.width,bufferCanvas.height)
 
 bufferCtx.fillStyle="white"
-bufferCtx.font="bold 110px Arial"
+let fontSizeResponsive = window.innerWidth < 600 ? 60 : 110
+bufferCtx.font = `bold ${fontSizeResponsive}px Arial`
 bufferCtx.textAlign="center"
 bufferCtx.textBaseline="middle"
 
@@ -496,8 +523,10 @@ let data = bufferCtx.getImageData(0,0,bufferCanvas.width,bufferCanvas.height).da
 
 let i = 0
 
-for(let y=0;y<bufferCanvas.height;y+=4){
-for(let x=0;x<bufferCanvas.width;x+=4){
+let gap = window.innerWidth < 600 ? 6 : 4
+
+for(let y=0;y<bufferCanvas.height;y+=gap){
+for(let x=0;x<bufferCanvas.width;x+=gap){
 
 let index = (y*bufferCanvas.width + x)*4
 
@@ -506,8 +535,8 @@ let alpha = data[index+3]
 if(alpha > 150 && particlesTexto[i]){
 
 // 🔥 AQUÍ SÍ funciona bien
-particlesTexto[i].tx = x * dpr
-particlesTexto[i].ty = y * dpr
+particlesTexto[i].tx = (x / bufferCanvas.width) * textCanvas.width
+particlesTexto[i].ty = (y / bufferCanvas.height) * textCanvas.height
 
 i++
 
@@ -585,5 +614,18 @@ document.body.style.background = "#0b1d51"
 
 // mostrar album
 document.getElementById("album").style.display="flex"
+
+/*soporte para celular*/
+
+window.addEventListener("orientationchange", () => {
+
+setTimeout(() => {
+
+resizeCanvas()
+rebuildScene()
+
+}, 300)
+
+})
 
 }

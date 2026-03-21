@@ -1,0 +1,219 @@
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+background:black;
+overflow:hidden;
+font-family:Arial, sans-serif;
+color:white;
+}
+
+/* pantalla girar telefono */
+
+#rotateMessage{
+position:fixed;
+width:100%;
+height:100vh;
+background:black;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:10;
+text-align:center;
+}
+
+.rotate-content{
+color:white;
+font-size:22px;
+}
+
+.phone-icon{
+font-size:60px;
+animation: rotatePhone 1.5s infinite;
+margin-bottom:15px;
+}
+
+@keyframes rotatePhone{
+
+0%{transform:rotate(0deg)}
+50%{transform:rotate(90deg)}
+100%{transform:rotate(0deg)}
+
+}
+
+/* matrix */
+
+#matrixCanvas{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+z-index:1;
+}
+
+/* texto centro */
+
+#birthdayText{
+
+position:absolute;
+top:50%;
+left:50%;
+
+transform:translate(-50%,-50%);
+
+font-size:120px;
+
+color:#ff4da6;
+
+font-family:monospace;
+
+text-align:center;
+
+z-index:5;
+
+letter-spacing:10px;
+
+/* efecto pixel lcd */
+
+text-shadow:
+2px 0 #ff4da6,
+-2px 0 #ff4da6,
+0 2px #ff4da6,
+0 -2px #ff4da6;
+
+}
+
+/* animacion caida */
+
+.fall{
+
+animation:fallDown 1s forwards;
+
+}
+
+@keyframes fallDown{
+
+0%{
+transform:translate(-50%,-50%);
+opacity:1;
+}
+
+100%{
+transform:translate(-50%,200%);
+opacity:0;
+}
+
+}
+#matrixCanvas{
+
+position:fixed;
+top:0;
+left:0;
+z-index:1;
+
+}
+
+#textCanvas{
+
+position:fixed;
+top:0;
+left:0;
+z-index:2;
+pointer-events:none;
+
+}
+
+/* ========================= */
+/* ALBUM DE FOTOS */
+/* ========================= */
+
+#album{
+
+position:fixed;
+top:0;
+left:0;
+
+width:100vw;
+height:100vh;
+
+display:none;
+
+overflow-x:scroll;
+overflow-y:hidden;
+
+scroll-snap-type:x mandatory;
+scroll-behavior:smooth;
+
+background:#0b1d51;
+
+z-index:20;
+
+}
+
+.page{
+
+min-width:100vw;
+height:100vh;
+
+position:relative;
+
+scroll-snap-align:center;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+}
+
+.photo{
+
+width:220px;
+
+position:absolute;
+
+border-radius:12px;
+
+box-shadow:0 20px 40px rgba(0,0,0,0.7);
+
+transition:transform 0.3s;
+
+}
+
+.photo:hover{
+
+transform:scale(1.08);
+
+}
+
+/* posicion de fotos inclinadas */
+
+.page .photo:nth-child(1){
+
+top:20%;
+left:15%;
+
+transform:rotate(-18deg);
+
+}
+
+.page .photo:nth-child(2){
+
+top:45%;
+left:40%;
+
+transform:rotate(12deg);
+
+}
+
+.page .photo:nth-child(3){
+
+top:25%;
+right:15%;
+
+transform:rotate(-20deg);
+
+}

@@ -84,24 +84,35 @@ drops[i]++
 /*soporte para celular*/
 function rebuildScene(){
 
-// limpiar partículas
+// detener matrix anterior
+clearInterval(matrixInterval)
+
+// limpiar todo
 particlesTexto = []
 particlesBorde = []
 
-// limpiar canvas
 ctx.clearRect(0,0,canvas.width,canvas.height)
 textCtx.clearRect(0,0,textCanvas.width,textCanvas.height)
 
 // reiniciar matrix
 resetMatrix()
+startMatrix()
 
-// volver a dibujar lo que iba
+// reiniciar partículas si ya estaban activas
 if(fraseActual < frases.length){
-createTextParticles(frases[fraseActual])
+startParticles()
 }
 
 }
 
+window.addEventListener("resize", () => {
+
+setTimeout(() => {
+resizeCanvas()
+rebuildScene()
+}, 300)
+
+})
 let matrixInterval
 
 function startMatrix(){
@@ -501,8 +512,8 @@ p.ty = null
 }
 
 // usar canvas normal (sin dpr)
-bufferCanvas.width = window.innerWidth
-bufferCanvas.height = window.innerHeight
+bufferCanvas.width = textCanvas.width / dpr
+bufferCanvas.height = textCanvas.height / dpr
 
 bufferCtx.clearRect(0,0,bufferCanvas.width,bufferCanvas.height)
 

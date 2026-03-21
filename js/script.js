@@ -425,8 +425,8 @@ particlesBorde = []
 
 let isMobile = window.innerWidth < 600
 
-let total = isMobile ? 1500 : 2500
-let textoCount = isMobile ? 700 : 1200
+let total = isMobile ? 2000 : 3000
+let textoCount = isMobile ? 1000 : 1600
 
 for(let i = 0; i < total; i++){
 
@@ -534,7 +534,9 @@ let data = bufferCtx.getImageData(0,0,bufferCanvas.width,bufferCanvas.height).da
 
 let i = 0
 
-let gap = window.innerWidth < 600 ? 6 : 4
+let isMobile = window.innerWidth < 600
+
+let gap = isMobile ? 5 : 3
 
 for(let y=0;y<bufferCanvas.height;y+=gap){
 for(let x=0;x<bufferCanvas.width;x+=gap){

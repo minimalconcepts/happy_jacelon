@@ -404,7 +404,9 @@ p.y += (p.ty-p.y)*0.07
 }
 
 textCtx.beginPath()
-textCtx.arc(p.x,p.y,2,0,Math.PI*2)
+textCtx.arc(p.x,p.y,1.5,0,Math.PI*2)
+textCtx.shadowBlur = 8
+textCtx.shadowColor = `hsl(${hue},100%,60%)`
 textCtx.fillStyle = `hsl(${hue},100%,60%)`
 textCtx.fill()
 
@@ -557,10 +559,20 @@ for(let i=0;i<lines.length;i++){
   )
 
 }
+bufferCtx.lineWidth = 3
+bufferCtx.strokeStyle = "white"
+
+for(let i=0;i<lines.length;i++){
+  bufferCtx.strokeText(
+    lines[i],
+    bufferCanvas.width/2,
+    startY + i * lineHeight
+  )
+}
 
 // leer datos correctamente
 let isMobile = window.innerWidth < 600
-let gap = 2
+let gap = 1
 let data = bufferCtx.getImageData(0,0,bufferCanvas.width,bufferCanvas.height).data
 
 // 🔥 mezclar puntos para mejor distribución

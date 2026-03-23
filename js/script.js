@@ -425,7 +425,7 @@ particlesBorde = []
 
 let isMobile = window.innerWidth < 600
 
-let total = isMobile ? 2000 : 3000
+let total = isMobile ? 4000 : 5000
 let textoCount = isMobile ? 1000 : 1600
 
 for(let i = 0; i < total; i++){
@@ -523,40 +523,80 @@ bufferCtx.font = `bold ${fontSizeResponsive}px Arial`
 bufferCtx.textAlign="center"
 bufferCtx.textBaseline="middle"
 
-bufferCtx.fillText(
-message,
-bufferCanvas.width/2,
-bufferCanvas.height/2
-)
+// 🔥 dividir texto en líneas automáticamente
+let words = message.split(" ")
+let lines = []
+let currentLine = ""
+
+for(let word of words){
+
+  let testLine = currentLine + word + " "
+  let metrics = bufferCtx.measureText(testLine)
+
+  if(metrics.width > bufferCanvas.width * 0.7){
+    lines.push(currentLine)
+    currentLine = word + " "
+  }else{
+    currentLine = testLine
+  }
+
+}
+
+lines.push(currentLine)
+
+// 🔥 dibujar líneas centradas
+let lineHeight = fontSizeResponsive * 1.2
+let startY = bufferCanvas.height/2 - (lines.length * lineHeight)/2
+
+for(let i=0;i<lines.length;i++){
+
+  bufferCtx.fillText(
+    lines[i],
+    bufferCanvas.width/2,
+    startY + i * lineHeight
+  )
+
+}
 
 // leer datos correctamente
+let isMobile = window.innerWidth < 600
+let gap = 2
 let data = bufferCtx.getImageData(0,0,bufferCanvas.width,bufferCanvas.height).data
+
+// 🔥 mezclar puntos para mejor distribución
+let points = []
+
+for(let y=0;y<bufferCanvas.height;y+=gap){
+  for(let x=0;x<bufferCanvas.width;x+=gap){
+
+    let index = (y*bufferCanvas.width + x)*4
+    let alpha = data[index+3]
+
+    if(alpha > 80){
+      points.push({x,y})
+    }
+
+  }
+}
+
+// 🔥 mezclar aleatoriamente
+points.sort(() => Math.random() - 0.5)
 
 let i = 0
 
-let isMobile = window.innerWidth < 600
+for(let p of particlesTexto){
 
-let gap = isMobile ? 2 : 2
-
-for(let y=0;y<bufferCanvas.height;y+=gap){
-for(let x=0;x<bufferCanvas.width;x+=gap){
-
-let index = (y*bufferCanvas.width + x)*4
-
-let alpha = data[index+3]
-
-if(alpha > 100 && particlesTexto[i]){
-    
-// 🔥 AQUÍ SÍ funciona bien
-particlesTexto[i].tx = (x / bufferCanvas.width) * textCanvas.width
-particlesTexto[i].ty = (y / bufferCanvas.height) * textCanvas.height
-
-i++
+  if(points[i]){
+    p.tx = (points[i].x / bufferCanvas.width) * textCanvas.width
+    p.ty = (points[i].y / bufferCanvas.height) * textCanvas.height
+    i++
+  }else{
+    p.tx = textCanvas.width/2
+    p.ty = textCanvas.height/2
+  }
 
 }
 
-}
-}
 
 // sobrantes al centro
 for(let j=i; j<particlesTexto.length; j++){

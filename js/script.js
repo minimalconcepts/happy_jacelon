@@ -518,7 +518,7 @@ bufferCanvas.height = textCanvas.height / dpr
 bufferCtx.clearRect(0,0,bufferCanvas.width,bufferCanvas.height)
 
 bufferCtx.fillStyle="white"
-let fontSizeResponsive = window.innerWidth < 600 ? 60 : 110
+let fontSizeResponsive = window.innerWidth < 600 ? 90 : 140
 bufferCtx.font = `bold ${fontSizeResponsive}px Arial`
 bufferCtx.textAlign="center"
 bufferCtx.textBaseline="middle"
@@ -536,7 +536,7 @@ let i = 0
 
 let isMobile = window.innerWidth < 600
 
-let gap = isMobile ? 5 : 3
+let gap = isMobile ? 2 : 2
 
 for(let y=0;y<bufferCanvas.height;y+=gap){
 for(let x=0;x<bufferCanvas.width;x+=gap){
@@ -545,8 +545,8 @@ let index = (y*bufferCanvas.width + x)*4
 
 let alpha = data[index+3]
 
-if(alpha > 150 && particlesTexto[i]){
-
+if(alpha > 100 && particlesTexto[i]){
+    
 // 🔥 AQUÍ SÍ funciona bien
 particlesTexto[i].tx = (x / bufferCanvas.width) * textCanvas.width
 particlesTexto[i].ty = (y / bufferCanvas.height) * textCanvas.height

@@ -404,9 +404,7 @@ p.y += (p.ty-p.y)*0.07
 }
 
 textCtx.beginPath()
-textCtx.arc(p.x,p.y,1.5,0,Math.PI*2)
-textCtx.shadowBlur = 8
-textCtx.shadowColor = `hsl(${hue},100%,60%)`
+textCtx.arc(p.x,p.y,2,0,Math.PI*2)
 textCtx.fillStyle = `hsl(${hue},100%,60%)`
 textCtx.fill()
 
@@ -558,16 +556,6 @@ for(let i=0;i<lines.length;i++){
     startY + i * lineHeight
   )
 
-}
-bufferCtx.lineWidth = 3
-bufferCtx.strokeStyle = "white"
-
-for(let i=0;i<lines.length;i++){
-  bufferCtx.strokeText(
-    lines[i],
-    bufferCanvas.width/2,
-    startY + i * lineHeight
-  )
 }
 
 // leer datos correctamente

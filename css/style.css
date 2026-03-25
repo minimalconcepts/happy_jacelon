@@ -128,10 +128,10 @@ transition:opacity 240ms ease;
 opacity:1;
 }
 
-.music-toggle{
+.music-toggle,
+.fullscreen-toggle{
 position:fixed;
 top:calc(14px + env(safe-area-inset-top, 0px));
-right:16px;
 z-index:24;
 display:flex;
 align-items:center;
@@ -155,6 +155,14 @@ border-color 220ms ease,
 opacity 220ms ease;
 }
 
+.music-toggle{
+right:16px;
+}
+
+.fullscreen-toggle{
+left:16px;
+}
+
 .music-toggle::before{
 content:"";
 width:10px;
@@ -164,7 +172,17 @@ background:rgba(99,245,255,0.5);
 box-shadow:0 0 12px rgba(99,245,255,0.28);
 }
 
-.music-toggle:hover{
+.fullscreen-toggle::before{
+content:"";
+width:12px;
+height:12px;
+border-radius:3px;
+border:2px solid rgba(99,245,255,0.72);
+box-shadow:0 0 12px rgba(99,245,255,0.18);
+}
+
+.music-toggle:hover,
+.fullscreen-toggle:hover{
 transform:translateY(-1px);
 }
 
@@ -184,6 +202,16 @@ animation:musicPulse 1.2s ease-in-out infinite;
 .music-toggle.is-missing{
 opacity:0.86;
 border-color:rgba(99,245,255,0.18);
+}
+
+.fullscreen-toggle.is-active{
+background:rgba(20,13,38,0.86);
+border-color:rgba(99,245,255,0.34);
+}
+
+.fullscreen-toggle.is-hidden{
+opacity:0;
+pointer-events:none;
 }
 
 @keyframes musicPulse{
@@ -649,17 +677,30 @@ height:min(60vh, 430px);
 }
 
 @media (max-height:460px) and (orientation:landscape){
-.music-toggle{
+ .music-toggle,
+ .fullscreen-toggle{
 top:calc(8px + env(safe-area-inset-top, 0px));
-right:12px;
 padding:8px 12px;
 font-size:0.74rem;
 letter-spacing:0.12em;
 }
 
+.music-toggle{
+right:12px;
+}
+
+.fullscreen-toggle{
+left:12px;
+}
+
 .music-toggle::before{
 width:8px;
 height:8px;
+}
+
+.fullscreen-toggle::before{
+width:10px;
+height:10px;
 }
 
 .album-header{

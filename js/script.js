@@ -1,5 +1,6 @@
 const matrixCanvas = document.getElementById("matrixCanvas");
 const textCanvas = document.getElementById("textCanvas");
+const fullscreenToggle = document.getElementById("fullscreenToggle");
 const musicToggle = document.getElementById("musicToggle");
 const soundtrack = document.getElementById("soundtrack");
 const rotateMessage = document.getElementById("rotateMessage");
@@ -38,7 +39,10 @@ const state = {
   albumHeartMode: false,
   musicReady: false,
   musicMissing: false,
-  musicPlaying: false
+  musicPlaying: false,
+  isPaused: false,
+  appStarted: false,
+  resumeMusicOnUnpause: false
 };
 
 const ledFont = {
@@ -116,6 +120,7 @@ const ledGlyphs = buildGlyphMap({
   8: "01110/10001/10001/01110/10001/10001/01110",
   9: "01110/10001/10001/01111/00001/00001/01110"
 });
+const pauseResolvers = [];
 
 function setCanvasSize() {
   state.dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -199,8 +204,16 @@ function clearTextCanvas() {
   textCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 }
 
-function wait(ms) {
-  return new Promise((resolve) => window.setTimeout(resolve, ms));
+async function wait(ms) {
+  let remaining = ms;
+
+  while (remaining > 0) {
+    await waitForActiveScene();
+
+    const step = Math.min(remaining, 60);
+    await new Promise((resolve) => window.setTimeout(resolve, step));
+    remaining -= step;
+  }
 }
 
 function cancelMessageFrame() {
@@ -208,6 +221,72 @@ function cancelMessageFrame() {
     window.cancelAnimationFrame(state.messageFrame);
     state.messageFrame = null;
   }
+}
+
+function isPortraitMobile() {
+  return window.innerWidth < 900 && window.innerHeight > window.innerWidth;
+}
+
+function resolvePauseWaiters() {
+  while (pauseResolvers.length) {
+    const resolve = pauseResolvers.shift();
+    resolve();
+  }
+}
+
+function waitForActiveScene() {
+  if (!state.isPaused) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    pauseResolvers.push(resolve);
+  });
+}
+
+async function applyPauseState(paused) {
+  if (state.isPaused === paused) {
+    return;
+  }
+
+  state.isPaused = paused;
+  rotateMessage.classList.toggle("is-visible", paused);
+
+  if (paused) {
+    if (state.phase === "intro") {
+      stopMatrix();
+    }
+
+    if (soundtrack && !soundtrack.paused && state.musicPlaying) {
+      state.resumeMusicOnUnpause = true;
+      soundtrack.pause();
+    }
+
+    return;
+  }
+
+  if (state.phase === "intro" && state.appStarted) {
+    startMatrix();
+  }
+
+  if (state.resumeMusicOnUnpause && state.musicReady) {
+    state.resumeMusicOnUnpause = false;
+
+    try {
+      await soundtrack.play();
+      state.musicPlaying = true;
+    } catch (error) {
+      state.musicPlaying = false;
+    }
+
+    updateMusicToggle();
+  }
+
+  resolvePauseWaiters();
+}
+
+function syncOrientationState() {
+  applyPauseState(isPortraitMobile());
 }
 
 function setCanvasLayers({ matrixVisible, textVisible }) {
@@ -299,37 +378,104 @@ function setupMusic() {
   updateMusicToggle();
 }
 
-async function animateLEDWord(word) {
-  const isMobile = window.innerWidth < 700;
-  const dotSize = isMobile ? 10 : 16;
-  const spacing = isMobile ? 8 : 10;
-  const letterGap = isMobile ? 18 : 30;
-  const rawLeds = [];
-  let cursorX = 0;
-
-  for (let letterIndex = 0; letterIndex < word.length; letterIndex += 1) {
-    const letter = ledFont[word[letterIndex]];
-    if (!letter) {
-      continue;
-    }
-
-    for (let row = 0; row < letter.length; row += 1) {
-      for (let col = 0; col < letter[row].length; col += 1) {
-        if (letter[row][col] !== 1) {
-          continue;
-        }
-
-        rawLeds.push({
-          x: cursorX + col * (dotSize + spacing),
-          y: row * (dotSize + spacing)
-        });
-      }
-    }
-
-    cursorX += 3 * (dotSize + spacing) + letterGap;
+function updateFullscreenToggle() {
+  if (!fullscreenToggle) {
+    return;
   }
 
-  const maxX = Math.max(...rawLeds.map((led) => led.x));
+  const supported = Boolean(document.fullscreenEnabled && document.documentElement.requestFullscreen);
+  fullscreenToggle.classList.toggle("is-hidden", !supported);
+  fullscreenToggle.classList.toggle("is-active", Boolean(document.fullscreenElement));
+  fullscreenToggle.textContent = document.fullscreenElement ? "Salir pantalla" : "Pantalla completa";
+}
+
+async function toggleFullscreen() {
+  if (!document.fullscreenEnabled || !document.documentElement.requestFullscreen) {
+    updateFullscreenToggle();
+    return;
+  }
+
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else {
+      await document.documentElement.requestFullscreen({ navigationUI: "hide" });
+
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock("landscape").catch(() => {});
+      }
+    }
+  } catch (error) {
+    // Some mobile browsers silently reject fullscreen without a trusted gesture.
+  }
+
+  updateFullscreenToggle();
+}
+
+function setupFullscreen() {
+  if (!fullscreenToggle) {
+    return;
+  }
+
+  fullscreenToggle.addEventListener("click", toggleFullscreen);
+  document.addEventListener("fullscreenchange", updateFullscreenToggle);
+  updateFullscreenToggle();
+}
+
+async function animateLEDWord(word) {
+  await waitForActiveScene();
+
+  const isMobile = window.innerWidth < 700;
+  const baseDotSize = isMobile ? 7 : 16;
+  const baseSpacing = isMobile ? 5 : 10;
+  const baseLetterGap = isMobile ? 11 : 30;
+
+  function buildWordLeds(dotSize, spacing, letterGap) {
+    const rawLeds = [];
+    let cursorX = 0;
+
+    for (let letterIndex = 0; letterIndex < word.length; letterIndex += 1) {
+      const letter = ledFont[word[letterIndex]];
+      if (!letter) {
+        continue;
+      }
+
+      for (let row = 0; row < letter.length; row += 1) {
+        for (let col = 0; col < letter[row].length; col += 1) {
+          if (letter[row][col] !== 1) {
+            continue;
+          }
+
+          rawLeds.push({
+            x: cursorX + col * (dotSize + spacing),
+            y: row * (dotSize + spacing)
+          });
+        }
+      }
+
+      cursorX += 3 * (dotSize + spacing) + letterGap;
+    }
+
+    return rawLeds;
+  }
+
+  let dotSize = baseDotSize;
+  let spacing = baseSpacing;
+  let letterGap = baseLetterGap;
+  let rawLeds = buildWordLeds(dotSize, spacing, letterGap);
+  let maxX = Math.max(...rawLeds.map((led) => led.x));
+  const availableWidth = window.innerWidth * (isMobile ? 0.84 : 0.74);
+  const wordWidth = maxX + dotSize;
+
+  if (wordWidth > availableWidth) {
+    const scale = Math.max(0.66, availableWidth / wordWidth);
+    dotSize = Math.max(5, baseDotSize * scale);
+    spacing = Math.max(3, baseSpacing * scale);
+    letterGap = Math.max(7, baseLetterGap * scale);
+    rawLeds = buildWordLeds(dotSize, spacing, letterGap);
+    maxX = Math.max(...rawLeds.map((led) => led.x));
+  }
+
   const maxY = Math.max(...rawLeds.map((led) => led.y));
   const offsetX = (window.innerWidth - (maxX + dotSize)) / 2;
   const offsetY = (window.innerHeight - (maxY + dotSize)) / 2;
@@ -356,10 +502,13 @@ async function animateLEDWord(word) {
   }
 
   textCtx.shadowBlur = 0;
-  await wait(900);
+  await wait(760);
+  clearTextCanvas();
+  await wait(140);
 }
 
 async function playIntroSequence() {
+  await waitForActiveScene();
   state.phase = "intro";
   setCanvasLayers({ matrixVisible: true, textVisible: true });
   introCopy.classList.add("is-visible");
@@ -367,7 +516,7 @@ async function playIntroSequence() {
 
   for (const word of ledWords) {
     await animateLEDWord(word);
-    await wait(450);
+    await wait(180);
   }
 
   introCopy.classList.remove("is-visible");
@@ -781,9 +930,25 @@ function animateLedPhrase(message) {
     const turnOnDuration = 960;
     const holdDuration = 2500 + Math.min(3400, state.currentBoard.message.length * 95);
     const start = performance.now();
+    let pausedAt = null;
+    let pausedDuration = 0;
 
     function frame(now) {
-      const elapsed = now - start;
+      if (state.isPaused) {
+        if (pausedAt === null) {
+          pausedAt = now;
+        }
+
+        state.messageFrame = window.requestAnimationFrame(frame);
+        return;
+      }
+
+      if (pausedAt !== null) {
+        pausedDuration += now - pausedAt;
+        pausedAt = null;
+      }
+
+      const elapsed = now - start - pausedDuration;
       const progress = Math.min(1, elapsed / turnOnDuration);
 
       drawLedBoard(state.currentBoard, progress, now);
@@ -999,8 +1164,17 @@ function showAlbum() {
 }
 
 function updateOrientationMessage() {
-  const isPortraitMobile = window.innerWidth < 900 && window.innerHeight > window.innerWidth;
-  rotateMessage.classList.toggle("is-visible", isPortraitMobile);
+  syncOrientationState();
+}
+
+async function startWhenReady() {
+  if (state.appStarted) {
+    return;
+  }
+
+  state.appStarted = true;
+  await waitForActiveScene();
+  runDebugStage();
 }
 
 function handleResize() {
@@ -1008,7 +1182,7 @@ function handleResize() {
   state.resizeTimer = window.setTimeout(() => {
     setCanvasSize();
     updateOrientationMessage();
-
+    window.scrollTo(0, 1);
   }, 150);
 }
 
@@ -1065,10 +1239,12 @@ function wireImageFallbacks() {
 function init() {
   setCanvasSize();
   updateOrientationMessage();
+  setupFullscreen();
   setupMusic();
   wireImageFallbacks();
   albumTrack.addEventListener("scroll", handleAlbumScroll, { passive: true });
-  runDebugStage();
+  window.scrollTo(0, 1);
+  startWhenReady();
 }
 
 window.addEventListener("resize", handleResize);

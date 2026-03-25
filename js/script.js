@@ -3,6 +3,8 @@ const textCanvas = document.getElementById("textCanvas");
 const fullscreenToggle = document.getElementById("fullscreenToggle");
 const musicToggle = document.getElementById("musicToggle");
 const soundtrack = document.getElementById("soundtrack");
+const launchPrompt = document.getElementById("launchPrompt");
+const startExperience = document.getElementById("startExperience");
 const rotateMessage = document.getElementById("rotateMessage");
 const introCopy = document.querySelector(".intro-copy");
 const album = document.getElementById("album");
@@ -42,7 +44,8 @@ const state = {
   musicPlaying: false,
   isPaused: false,
   appStarted: false,
-  resumeMusicOnUnpause: false
+  resumeMusicOnUnpause: false,
+  launchApproved: false
 };
 
 const ledFont = {
@@ -121,6 +124,7 @@ const ledGlyphs = buildGlyphMap({
   9: "01110/10001/10001/01111/00001/00001/01110"
 });
 const pauseResolvers = [];
+const launchResolvers = [];
 
 function setCanvasSize() {
   state.dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -287,6 +291,53 @@ async function applyPauseState(paused) {
 
 function syncOrientationState() {
   applyPauseState(isPortraitMobile());
+}
+
+function resolveLaunchWaiters() {
+  while (launchResolvers.length) {
+    const resolve = launchResolvers.shift();
+    resolve();
+  }
+}
+
+function waitForLaunchApproval() {
+  if (state.launchApproved || debugStage) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    launchResolvers.push(resolve);
+  });
+}
+
+function approveLaunch() {
+  if (state.launchApproved) {
+    return;
+  }
+
+  state.launchApproved = true;
+
+  if (launchPrompt) {
+    launchPrompt.classList.remove("is-visible");
+  }
+
+  resolveLaunchWaiters();
+}
+
+function setupLaunchPrompt() {
+  if (!launchPrompt || !startExperience) {
+    state.launchApproved = true;
+    return;
+  }
+
+  if (debugStage) {
+    state.launchApproved = true;
+    launchPrompt.classList.remove("is-visible");
+    return;
+  }
+
+  launchPrompt.classList.add("is-visible");
+  startExperience.addEventListener("click", approveLaunch);
 }
 
 function setCanvasLayers({ matrixVisible, textVisible }) {
@@ -1047,10 +1098,10 @@ async function playFinalScene() {
   curtainTop.style.opacity = "1";
   curtainBottom.style.opacity = "1";
   finalScene.classList.add("is-opening");
-  await wait(2860);
+  await wait(3260);
 
-  curtainTop.style.transform = "translateY(-140%)";
-  curtainBottom.style.transform = "translateY(140%)";
+  curtainTop.style.transform = "translateY(-200%)";
+  curtainBottom.style.transform = "translateY(200%)";
   curtainTop.style.opacity = "0";
   curtainBottom.style.opacity = "0";
   finalScene.classList.add("show-heart");
@@ -1104,8 +1155,8 @@ function showFinalDebugState() {
   albumTrack.classList.add("is-locked", "is-hidden");
   buildCurtains();
   finalScene.classList.add("is-visible", "show-beat", "show-heart", "is-opening");
-  curtainTop.style.transform = "translateY(-140%)";
-  curtainBottom.style.transform = "translateY(140%)";
+  curtainTop.style.transform = "translateY(-200%)";
+  curtainBottom.style.transform = "translateY(200%)";
   curtainTop.style.opacity = "0";
   curtainBottom.style.opacity = "0";
   heartCaption.classList.add("is-visible");
@@ -1174,6 +1225,8 @@ async function startWhenReady() {
 
   state.appStarted = true;
   await waitForActiveScene();
+  await waitForLaunchApproval();
+  await waitForActiveScene();
   runDebugStage();
 }
 
@@ -1239,6 +1292,7 @@ function wireImageFallbacks() {
 function init() {
   setCanvasSize();
   updateOrientationMessage();
+  setupLaunchPrompt();
   setupFullscreen();
   setupMusic();
   wireImageFallbacks();

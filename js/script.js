@@ -1,5 +1,6 @@
 const matrixCanvas = document.getElementById("matrixCanvas");
 const textCanvas = document.getElementById("textCanvas");
+const sceneFade = document.getElementById("sceneFade");
 const fullscreenToggle = document.getElementById("fullscreenToggle");
 const musicToggle = document.getElementById("musicToggle");
 const soundtrack = document.getElementById("soundtrack");
@@ -316,6 +317,7 @@ function approveLaunch() {
   }
 
   state.launchApproved = true;
+  document.body.classList.remove("launch-mode");
 
   if (launchPrompt) {
     launchPrompt.classList.remove("is-visible");
@@ -327,12 +329,14 @@ function approveLaunch() {
 function setupLaunchPrompt() {
   if (!launchPrompt || !startExperience) {
     state.launchApproved = true;
+    document.body.classList.remove("launch-mode");
     return;
   }
 
   if (debugStage) {
     state.launchApproved = true;
     launchPrompt.classList.remove("is-visible");
+    document.body.classList.remove("launch-mode");
     return;
   }
 
@@ -572,7 +576,27 @@ async function playIntroSequence() {
 
   introCopy.classList.remove("is-visible");
   await wait(500);
+  await transitionToMessageScene();
   startMessageSequence();
+}
+
+async function transitionToMessageScene() {
+  stopMatrix();
+
+  if (sceneFade) {
+    sceneFade.classList.add("is-active");
+  }
+
+  await wait(240);
+  matrixCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  setCanvasLayers({ matrixVisible: false, textVisible: true });
+  await wait(220);
+
+  if (sceneFade) {
+    sceneFade.classList.remove("is-active");
+  }
+
+  await wait(220);
 }
 
 function drawRoundedRect(context, x, y, width, height, radius) {
@@ -1100,8 +1124,8 @@ async function playFinalScene() {
   finalScene.classList.add("is-opening");
   await wait(3260);
 
-  curtainTop.style.transform = "translateY(-200%)";
-  curtainBottom.style.transform = "translateY(200%)";
+  curtainTop.style.transform = "translateY(-240%)";
+  curtainBottom.style.transform = "translateY(240%)";
   curtainTop.style.opacity = "0";
   curtainBottom.style.opacity = "0";
   finalScene.classList.add("show-heart");
@@ -1155,8 +1179,8 @@ function showFinalDebugState() {
   albumTrack.classList.add("is-locked", "is-hidden");
   buildCurtains();
   finalScene.classList.add("is-visible", "show-beat", "show-heart", "is-opening");
-  curtainTop.style.transform = "translateY(-200%)";
-  curtainBottom.style.transform = "translateY(200%)";
+  curtainTop.style.transform = "translateY(-240%)";
+  curtainBottom.style.transform = "translateY(240%)";
   curtainTop.style.opacity = "0";
   curtainBottom.style.opacity = "0";
   heartCaption.classList.add("is-visible");

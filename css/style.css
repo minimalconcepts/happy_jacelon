@@ -30,6 +30,29 @@ radial-gradient(circle at top, rgba(99,245,255,0.14), transparent 30%),
 radial-gradient(circle at bottom, rgba(255,77,166,0.18), transparent 35%),
 linear-gradient(180deg, #03040d 0%, #09142f 100%);
 color:var(--text);
+transition:background 700ms ease;
+}
+
+body.launch-mode{
+background:
+radial-gradient(circle at 18% 22%, rgba(220,255,118,0.62), transparent 28%),
+radial-gradient(circle at 82% 18%, rgba(153,255,72,0.28), transparent 24%),
+radial-gradient(circle at 52% 78%, rgba(192,255,96,0.22), transparent 26%),
+linear-gradient(135deg, #1f4410 0%, #68b60f 42%, #2f6207 100%);
+background-size:160% 160%, 160% 160%, 150% 150%, 140% 140%;
+animation:limeFlow 9s ease-in-out infinite alternate;
+}
+
+@keyframes limeFlow{
+0%{
+background-position:0% 30%, 100% 0%, 50% 100%, 0% 50%;
+}
+50%{
+background-position:28% 14%, 70% 18%, 44% 82%, 50% 50%;
+}
+100%{
+background-position:18% 42%, 90% 30%, 56% 74%, 100% 50%;
+}
 }
 
 .app-shell{
@@ -106,8 +129,24 @@ z-index:1;
 }
 
 #textCanvas{
-z-index:2;
+z-index:3;
 pointer-events:none;
+}
+
+.scene-fade{
+position:fixed;
+inset:0;
+z-index:2;
+opacity:0;
+pointer-events:none;
+background:
+radial-gradient(circle at center, rgba(255,205,111,0.14), transparent 36%),
+linear-gradient(180deg, rgba(7,12,28,0), rgba(7,12,28,0.78));
+transition:opacity 560ms ease;
+}
+
+.scene-fade.is-active{
+opacity:1;
 }
 
 .intro-copy{
@@ -483,7 +522,9 @@ content:"";
 position:absolute;
 inset:0;
 background:
-radial-gradient(circle at center, rgba(10,20,54,0.92), rgba(4,8,20,0.98) 70%);
+radial-gradient(circle at 50% 24%, rgba(255,136,93,0.18), transparent 30%),
+radial-gradient(circle at 52% 76%, rgba(255,89,154,0.12), transparent 24%),
+linear-gradient(180deg, rgba(17,18,45,0.96), rgba(8,7,20,0.98) 70%);
 }
 
 .final-scene.is-visible{
@@ -516,12 +557,12 @@ z-index:0;
 
 .curtain-top{
 top:0;
-transform:translateY(-200%);
+transform:translateY(-240%);
 }
 
 .curtain-bottom{
 bottom:0;
-transform:translateY(200%);
+transform:translateY(240%);
 }
 
 .final-scene.is-closing .curtain-top{
@@ -537,11 +578,11 @@ transition-duration:700ms;
 }
 
 .final-scene.is-opening .curtain-top{
-transform:translateY(-200%);
+transform:translateY(-240%);
 }
 
 .final-scene.is-opening .curtain-bottom{
-transform:translateY(200%);
+transform:translateY(240%);
 }
 
 .final-scene.is-opening .curtain{
@@ -601,12 +642,12 @@ stroke-linejoin:round;
 }
 
 .beat-lines .beat-line-base{
-stroke:rgba(255,196,118,0.22);
+stroke:rgba(255,187,112,0.26);
 stroke-width:4;
 }
 
 .beat-lines .beat-line-trace{
-stroke:#ffb86c;
+stroke:#ff8f63;
 stroke-dasharray:92 448;
 stroke-dashoffset:540;
 opacity:0.94;
@@ -641,7 +682,7 @@ stroke-dashoffset:760;
 }
 
 .final-scene.show-heart .beat-lines{
-opacity:0.64;
+opacity:0.74;
 }
 
 .final-scene.show-heart .line-heart{
@@ -683,14 +724,15 @@ line-height:1.42;
 color:#fff8fd;
 text-shadow:
 0 0 18px rgba(255,141,107,0.22),
-0 0 24px rgba(255,205,111,0.16);
+0 0 24px rgba(255,99,170,0.14),
+0 0 30px rgba(255,205,111,0.18);
 opacity:0;
 transition:opacity 420ms ease, transform 420ms ease;
 pointer-events:none;
 z-index:10;
 background:
 radial-gradient(circle at top, rgba(255,255,255,0.16), transparent 62%),
-linear-gradient(90deg, rgba(255,141,107,0.18), rgba(255,205,111,0.16));
+linear-gradient(90deg, rgba(255,141,107,0.2), rgba(255,99,170,0.14), rgba(255,205,111,0.16));
 padding:12px 24px;
 border:1px solid rgba(255,255,255,0.16);
 border-radius:22px;

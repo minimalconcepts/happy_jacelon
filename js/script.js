@@ -728,9 +728,21 @@ function chooseLedLayout(message, panel) {
   const innerWidth = panel.width - panel.padding * 2;
   const innerHeight = panel.height - panel.padding * 2;
   const maxChars = Math.min(22, Math.max(9, normalizedMessage.length));
+  const longestWordLength = Math.max(
+    1,
+    ...String(message)
+      .replace(/\|/g, " ")
+      .split(/\s+/)
+      .map((word) => normalizeLedChunk(word).length)
+      .filter(Boolean)
+  );
   let bestLayout = null;
 
   for (let lineLength = maxChars; lineLength >= 8; lineLength -= 1) {
+    if (lineLength < Math.min(longestWordLength, 14)) {
+      continue;
+    }
+
     const lines = wrapLedMessage(normalizedMessage, lineLength);
 
     if (!lines.length || lines.length > 4) {
@@ -874,7 +886,7 @@ function drawMessageBackdrop(now, board) {
     x: width * 0.77 + Math.cos(now / 1600) * width * 0.07,
     y: height * 0.68 + Math.sin(now / 1500) * height * 0.05,
     radius: width * 0.22,
-    color: "rgba(99, 245, 255, 0.16)"
+    color: "rgba(255, 198, 110, 0.16)"
   };
 
   [orbA, orbB].forEach((orb) => {
@@ -886,7 +898,7 @@ function drawMessageBackdrop(now, board) {
   });
 
   textCtx.save();
-  textCtx.strokeStyle = "rgba(99,245,255,0.12)";
+  textCtx.strokeStyle = "rgba(255,198,110,0.12)";
   textCtx.lineWidth = 2;
   textCtx.beginPath();
 
@@ -919,7 +931,7 @@ function drawMessageBackdrop(now, board) {
     const repeated = `${phrase}      ${phrase}      `;
     const textWidth = textCtx.measureText(repeated).width;
     const speed = 34 + laneIndex * 10;
-    const color = laneIndex % 2 === 0 ? "rgba(255,111,175,0.11)" : "rgba(99,245,255,0.1)";
+    const color = laneIndex % 2 === 0 ? "rgba(255,111,175,0.11)" : "rgba(255,198,110,0.1)";
     const direction = laneIndex % 2 === 0 ? 1 : -1;
     const travel = ((now / 1000) * speed * direction) % textWidth;
 
@@ -967,7 +979,7 @@ function drawLedBoard(board, progress, now) {
   textCtx.fillStyle = "rgba(1, 5, 14, 0.42)";
   textCtx.fill();
 
-  textCtx.fillStyle = "rgba(99, 245, 255, 0.1)";
+  textCtx.fillStyle = "rgba(255, 198, 110, 0.1)";
   textCtx.fillRect(panel.x + 16, panel.y + 14, panel.width - 32, 6);
   textCtx.restore();
 

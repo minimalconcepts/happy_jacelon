@@ -7,7 +7,7 @@
 --muted:rgba(246,244,255,0.78);
 --accent:#ff4da6;
 --accent-soft:#ff90c6;
---accent-2:#63f5ff;
+--accent-2:#ffc768;
 --shadow:0 18px 50px rgba(0,0,0,0.35);
 }
 
@@ -26,19 +26,19 @@ body{
 overflow:hidden;
 font-family:"Trebuchet MS",Arial,sans-serif;
 background:
-radial-gradient(circle at top, rgba(99,245,255,0.14), transparent 30%),
-radial-gradient(circle at bottom, rgba(255,77,166,0.18), transparent 35%),
-linear-gradient(180deg, #03040d 0%, #09142f 100%);
+radial-gradient(circle at 20% 12%, rgba(255,174,104,0.16), transparent 28%),
+radial-gradient(circle at 78% 78%, rgba(255,94,166,0.16), transparent 34%),
+linear-gradient(180deg, #060712 0%, #140f28 54%, #090814 100%);
 color:var(--text);
 transition:background 700ms ease;
 }
 
 body.launch-mode{
 background:
-radial-gradient(circle at 18% 22%, rgba(220,255,118,0.62), transparent 28%),
-radial-gradient(circle at 82% 18%, rgba(153,255,72,0.28), transparent 24%),
-radial-gradient(circle at 52% 78%, rgba(192,255,96,0.22), transparent 26%),
-linear-gradient(135deg, #1f4410 0%, #68b60f 42%, #2f6207 100%);
+radial-gradient(circle at 18% 22%, rgba(255,164,95,0.34), transparent 28%),
+radial-gradient(circle at 82% 18%, rgba(255,109,160,0.2), transparent 24%),
+radial-gradient(circle at 52% 78%, rgba(255,208,114,0.18), transparent 26%),
+linear-gradient(135deg, #17122e 0%, #3b1b36 42%, #1a1833 100%);
 background-size:160% 160%, 160% 160%, 150% 150%, 140% 140%;
 animation:limeFlow 9s ease-in-out infinite alternate;
 }
@@ -140,8 +140,8 @@ z-index:2;
 opacity:0;
 pointer-events:none;
 background:
-radial-gradient(circle at center, rgba(255,205,111,0.14), transparent 36%),
-linear-gradient(180deg, rgba(7,12,28,0), rgba(7,12,28,0.78));
+radial-gradient(circle at center, rgba(255,189,102,0.18), transparent 38%),
+linear-gradient(180deg, rgba(20,14,40,0), rgba(20,14,40,0.86));
 transition:opacity 560ms ease;
 }
 
@@ -207,8 +207,8 @@ content:"";
 width:10px;
 height:10px;
 border-radius:50%;
-background:rgba(99,245,255,0.5);
-box-shadow:0 0 12px rgba(99,245,255,0.28);
+background:rgba(255,193,103,0.75);
+box-shadow:0 0 12px rgba(255,193,103,0.28);
 }
 
 .fullscreen-toggle::before{
@@ -216,8 +216,8 @@ content:"";
 width:12px;
 height:12px;
 border-radius:3px;
-border:2px solid rgba(99,245,255,0.72);
-box-shadow:0 0 12px rgba(99,245,255,0.18);
+border:2px solid rgba(255,193,103,0.78);
+box-shadow:0 0 12px rgba(255,193,103,0.2);
 }
 
 .music-toggle:hover,
@@ -240,12 +240,12 @@ animation:musicPulse 1.2s ease-in-out infinite;
 
 .music-toggle.is-missing{
 opacity:0.86;
-border-color:rgba(99,245,255,0.18);
+border-color:rgba(255,193,103,0.18);
 }
 
 .fullscreen-toggle.is-active{
 background:rgba(20,13,38,0.86);
-border-color:rgba(99,245,255,0.34);
+border-color:rgba(255,193,103,0.38);
 }
 
 .fullscreen-toggle.is-hidden{
@@ -345,8 +345,8 @@ display:none;
 z-index:20;
 overflow:hidden;
 background:
-radial-gradient(circle at top, rgba(99,245,255,0.12), transparent 25%),
-linear-gradient(180deg, #09142f 0%, #08112d 45%, #050811 100%);
+radial-gradient(circle at top, rgba(255,183,101,0.12), transparent 25%),
+linear-gradient(180deg, #120f25 0%, #161126 45%, #090814 100%);
 }
 
 .album.is-visible{
@@ -469,7 +469,7 @@ overflow:hidden;
 border-radius:24px;
 border:1px solid rgba(255,255,255,0.1);
 background:
-linear-gradient(160deg, rgba(255,77,166,0.16), rgba(99,245,255,0.1)),
+linear-gradient(160deg, rgba(255,77,166,0.16), rgba(255,199,104,0.1)),
 rgba(255,255,255,0.04);
 box-shadow:var(--shadow);
 min-height:180px;
@@ -522,9 +522,10 @@ content:"";
 position:absolute;
 inset:0;
 background:
-radial-gradient(circle at 50% 24%, rgba(255,136,93,0.18), transparent 30%),
-radial-gradient(circle at 52% 76%, rgba(255,89,154,0.12), transparent 24%),
-linear-gradient(180deg, rgba(17,18,45,0.96), rgba(8,7,20,0.98) 70%);
+radial-gradient(circle at 50% 24%, rgba(255,160,94,0.22), transparent 28%),
+radial-gradient(circle at 52% 76%, rgba(255,94,166,0.16), transparent 24%),
+radial-gradient(circle at 24% 56%, rgba(255,217,112,0.08), transparent 26%),
+linear-gradient(180deg, rgba(24,18,40,0.97), rgba(12,8,24,0.99) 72%);
 }
 
 .final-scene.is-visible{
@@ -551,7 +552,7 @@ content:"";
 position:absolute;
 inset:0;
 background:
-linear-gradient(180deg, rgba(16,24,58,0.98), rgba(8,12,28,0.98));
+linear-gradient(180deg, rgba(32,21,47,0.98), rgba(13,9,24,0.99));
 z-index:0;
 }
 
@@ -596,7 +597,7 @@ overflow:hidden;
 border-radius:16px;
 border:1px solid rgba(255,255,255,0.14);
 background:
-linear-gradient(160deg, rgba(255,77,166,0.18), rgba(99,245,255,0.12)),
+linear-gradient(160deg, rgba(255,77,166,0.18), rgba(255,193,103,0.12)),
 rgba(255,255,255,0.06);
 box-shadow:0 12px 28px rgba(0,0,0,0.28);
 z-index:1;
@@ -630,7 +631,7 @@ width:min(76vw, 470px);
 transform:translate(-50%, -50%);
 opacity:0;
 z-index:1;
-filter:drop-shadow(0 0 18px rgba(255,181,102,0.2));
+filter:drop-shadow(0 0 18px rgba(255,166,112,0.22));
 transition:opacity 420ms ease;
 }
 
@@ -642,12 +643,12 @@ stroke-linejoin:round;
 }
 
 .beat-lines .beat-line-base{
-stroke:rgba(255,187,112,0.26);
+stroke:rgba(255,205,132,0.22);
 stroke-width:4;
 }
 
 .beat-lines .beat-line-trace{
-stroke:#ff8f63;
+stroke:#ff8a73;
 stroke-dasharray:92 448;
 stroke-dashoffset:540;
 opacity:0.94;
@@ -658,43 +659,96 @@ animation:beatLoop 2.35s linear infinite;
 opacity:1;
 }
 
-.line-heart{
+.heart-bloom{
 position:absolute;
 left:50%;
 top:44%;
-width:min(62vw, 340px);
-height:auto;
-transform:translate(-50%, -50%) scale(0.9);
+width:min(76vw, 480px);
+height:min(66vw, 420px);
+transform:translate(-50%, -50%) scale(0.96);
 opacity:0;
 transition:opacity 420ms ease, transform 420ms ease;
 z-index:2;
-filter:drop-shadow(0 0 20px rgba(255,166,109,0.22));
+overflow:visible;
+pointer-events:none;
 }
 
-.line-heart path{
+.heart-layer{
+position:absolute;
+inset:0;
+display:block;
+width:100%;
+height:100%;
+overflow:visible;
+transform-origin:center center;
+opacity:0.98;
+}
+
+.heart-layer .heart-ring{
 fill:none;
-stroke:url(#lineHeartGradient);
-stroke-width:8;
+stroke:var(--heart-stroke, #ff9a6d);
+stroke-width:6;
 stroke-linecap:round;
 stroke-linejoin:round;
-stroke-dasharray:760;
-stroke-dashoffset:760;
+stroke-dasharray:820;
+stroke-dashoffset:820;
+filter:drop-shadow(0 0 16px var(--heart-glow, rgba(255,166,109,0.22)));
 }
 
 .final-scene.show-heart .beat-lines{
-opacity:0.74;
+opacity:0.8;
 }
 
-.final-scene.show-heart .line-heart{
+.heart-layer-1{
+--heart-stroke:#fff0a6;
+--heart-glow:rgba(255,240,166,0.24);
+transform:scale(0.52);
+}
+
+.heart-layer-2{
+--heart-stroke:#ffcf79;
+--heart-glow:rgba(255,207,121,0.24);
+transform:scale(0.68);
+}
+
+.heart-layer-3{
+--heart-stroke:#ff9f7a;
+--heart-glow:rgba(255,159,122,0.24);
+transform:scale(0.84);
+}
+
+.heart-layer-4{
+--heart-stroke:#ff6fa6;
+--heart-glow:rgba(255,111,166,0.24);
+transform:scale(1);
+}
+
+.heart-layer-5{
+--heart-stroke:#ffb86b;
+--heart-glow:rgba(255,184,107,0.28);
+transform:scale(1.16);
+}
+
+.final-scene.show-heart .heart-bloom{
 opacity:1;
 transform:translate(-50%, -50%) scale(1);
 }
 
-.final-scene.show-heart .line-heart path{
-animation:drawHeart 2s ease forwards;
+.final-scene.show-heart .heart-layer .heart-ring{
+stroke-dashoffset:0;
+animation:drawHeart 1.9s ease forwards;
 }
 
+.final-scene.show-heart .heart-layer-1 .heart-ring{animation-delay:0.02s;}
+.final-scene.show-heart .heart-layer-2 .heart-ring{animation-delay:0.18s;}
+.final-scene.show-heart .heart-layer-3 .heart-ring{animation-delay:0.34s;}
+.final-scene.show-heart .heart-layer-4 .heart-ring{animation-delay:0.5s;}
+.final-scene.show-heart .heart-layer-5 .heart-ring{animation-delay:0.66s;}
+
 @keyframes drawHeart{
+from{
+stroke-dashoffset:820;
+}
 to{
 stroke-dashoffset:0;
 }
@@ -732,7 +786,7 @@ pointer-events:none;
 z-index:10;
 background:
 radial-gradient(circle at top, rgba(255,255,255,0.16), transparent 62%),
-linear-gradient(90deg, rgba(255,141,107,0.2), rgba(255,99,170,0.14), rgba(255,205,111,0.16));
+linear-gradient(90deg, rgba(255,166,111,0.22), rgba(255,102,168,0.16), rgba(255,214,120,0.18));
 padding:12px 24px;
 border:1px solid rgba(255,255,255,0.16);
 border-radius:22px;
@@ -772,7 +826,7 @@ line-height:1.5;
 color:rgba(246,244,255,0.75);
 background:
 radial-gradient(circle at top left, rgba(255,77,166,0.24), transparent 35%),
-radial-gradient(circle at bottom right, rgba(99,245,255,0.18), transparent 42%);
+radial-gradient(circle at bottom right, rgba(255,199,104,0.18), transparent 42%);
 }
 
 .photo:not(.is-missing) + .photo-fallback{
@@ -941,9 +995,10 @@ top:37%;
 width:min(70vw, 330px);
 }
 
-.line-heart{
+.heart-bloom{
 top:37%;
-width:min(44vw, 190px);
+width:min(58vw, 250px);
+height:min(50vw, 214px);
 }
 
 .heart-caption{

@@ -1,53 +1,153 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Happy Jacelon</title>
-
+<meta name="description" content="Una pagina de cumpleanos con animaciones y album de recuerdos.">
 <link rel="stylesheet" href="css/style.css">
-
 </head>
-
 <body>
+<main class="app-shell">
+<section id="rotateMessage" class="rotate-message" aria-live="polite">
+<div class="rotate-card">
+<div class="phone-icon" aria-hidden="true">&#128241;</div>
+<p class="rotate-title">Gira tu telefono</p>
+<p class="rotate-copy">Esta sorpresa se disfruta mejor en horizontal.</p>
+</div>
+</section>
 
-<div id="rotateMessage">
+<canvas id="matrixCanvas" aria-hidden="true"></canvas>
+<canvas id="textCanvas" aria-hidden="true"></canvas>
 
-<div class="rotate-content">
-<div class="phone-icon">📱</div>
-<p>Gira tu teléfono</p>
+<button id="musicToggle" class="music-toggle" type="button" aria-pressed="false">
+Musica
+</button>
+<audio id="soundtrack" preload="auto" loop>
+<source src="assets/audio/cancion.mp3" type="audio/mpeg">
+</audio>
+
+<section class="intro-copy" aria-hidden="true">
+<p>Happy Birthday Besty</p>
+</section>
+
+<section id="album" class="album" aria-label="Album de recuerdos">
+<header class="album-header">
+<p class="album-kicker">Para ti</p>
+<h1>Feliz cumpleanos, besty</h1>
+<p>Desliza hasta el final. La ultima imagen guarda una sorpresa.</p>
+</header>
+
+<div id="albumBanner" class="album-banner" aria-live="polite">
+<p id="albumPrompt" class="album-prompt"></p>
+<p id="albumCountdown" class="album-countdown"></p>
 </div>
 
+<div id="albumStage" class="album-stage">
+<div id="albumTrack" class="album-track">
+<div class="photo-frame memory-card">
+<img src="assets/images/foto1.jpg" class="photo" alt="Recuerdo 1">
+<div class="photo-fallback">Aqui va una foto especial</div>
 </div>
-
-<canvas id="matrixCanvas"></canvas>
-<canvas id="textCanvas"></canvas>
-
-
-<div id="album">
-
-<div class="page">
-
-<img src="img/foto1.jpg" class="photo">
-<img src="img/foto2.jpg" class="photo">
-<img src="img/foto3.jpg" class="photo">
-
+<div class="photo-frame memory-card">
+<img src="assets/images/foto2.jpg" class="photo" alt="Recuerdo 2">
+<div class="photo-fallback">Otro momento bonito</div>
 </div>
-
-<div class="page">
-
-<img src="img/foto4.jpg" class="photo">
-<img src="img/foto5.jpg" class="photo">
-<img src="img/foto6.jpg" class="photo">
-
+<div class="photo-frame memory-card">
+<img src="assets/images/foto3.jpg" class="photo" alt="Recuerdo 3">
+<div class="photo-fallback">Tu sonrisa favorita</div>
 </div>
-
+<div class="photo-frame memory-card">
+<img src="assets/images/foto4.jpg" class="photo" alt="Recuerdo 4">
+<div class="photo-fallback">Un recuerdo mas</div>
 </div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto5.jpg" class="photo" alt="Recuerdo 5">
+<div class="photo-fallback">Una aventura juntas</div>
+</div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto6.jpg" class="photo" alt="Recuerdo 6">
+<div class="photo-fallback">Final con mucho carino</div>
+</div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto7.jpg" class="photo" alt="Recuerdo 7">
+<div class="photo-fallback">Aqui cabe otro recuerdo inolvidable</div>
+</div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto8.jpg" class="photo" alt="Recuerdo 8">
+<div class="photo-fallback">La ultima foto activa la sorpresa</div>
+</div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto9.jpg" class="photo" alt="Recuerdo 9">
+<div class="photo-fallback">Otro pedacito de historia juntas</div>
+</div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto10.jpg" class="photo" alt="Recuerdo 10">
+<div class="photo-fallback">Una foto para seguir llenando el album</div>
+</div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto11.jpg" class="photo" alt="Recuerdo 11">
+<div class="photo-fallback">Recuerdo numero once</div>
+</div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto12.jpg" class="photo" alt="Recuerdo 12">
+<div class="photo-fallback">Un momento que vale oro</div>
+</div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto13.jpg" class="photo" alt="Recuerdo 13">
+<div class="photo-fallback">Tu energia bonita merece otra foto</div>
+</div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto14.jpg" class="photo" alt="Recuerdo 14">
+<div class="photo-fallback">Otro recuerdo para el corazon</div>
+</div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto15.jpg" class="photo" alt="Recuerdo 15">
+<div class="photo-fallback">Aqui tambien puede ir una gran historia</div>
+</div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto16.jpg" class="photo" alt="Recuerdo 16">
+<div class="photo-fallback">Otra aventura inolvidable</div>
+</div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto17.jpg" class="photo" alt="Recuerdo 17">
+<div class="photo-fallback">Un instante feliz mas</div>
+</div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto18.jpg" class="photo" alt="Recuerdo 18">
+<div class="photo-fallback">La coleccion sigue creciendo</div>
+</div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto19.jpg" class="photo" alt="Recuerdo 19">
+<div class="photo-fallback">Ya casi llegas a la sorpresa final</div>
+</div>
+<div class="photo-frame memory-card">
+<img src="assets/images/foto20.jpg" class="photo" alt="Recuerdo 20">
+<div class="photo-fallback">La ultima imagen da paso al corazon</div>
+</div>
+</div>
+<div id="finalScene" class="final-scene" aria-hidden="true">
+<div id="curtainTop" class="curtain curtain-top"></div>
+<div id="curtainBottom" class="curtain curtain-bottom"></div>
+<svg id="beatLines" class="beat-lines" viewBox="0 0 320 120" aria-hidden="true">
+<path class="beat-line-base" d="M8 68h46l14-28 14 52 19-78 19 94 18-40h32l15-22 12 36 15-18h100"></path>
+<path class="beat-line-trace" d="M8 68h46l14-28 14 52 19-78 19 94 18-40h32l15-22 12 36 15-18h100"></path>
+</svg>
+<svg id="lineHeart" class="line-heart" viewBox="0 0 220 200" aria-hidden="true">
+<defs>
+<linearGradient id="lineHeartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" stop-color="#ff6faf"></stop>
+<stop offset="100%" stop-color="#63f5ff"></stop>
+</linearGradient>
+</defs>
+<path d="M110 184c-7-18-34-35-58-58C30 107 18 91 18 67c0-23 17-41 39-41 22 0 34 13 45 28 11-15 23-28 45-28 22 0 39 18 39 41 0 24-12 40-34 59-24 23-51 40-58 58Z"></path>
+</svg>
+</div>
+<p id="heartCaption" class="heart-caption">Gracias por ser mi mejor amiga</p>
+</div>
+</section>
+</main>
 
 <script src="js/script.js"></script>
-
 </body>
 </html>

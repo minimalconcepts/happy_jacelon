@@ -1,684 +1,1064 @@
-const rotateScreen = document.getElementById("rotateMessage")
-
-setTimeout(() => {
-
-rotateScreen.style.display="none"
-startMatrix()
-showWords()
-
-},5000)
-
-
-/*canvas auxiliar*/
-const bufferCanvas = document.createElement("canvas")
-const bufferCtx = bufferCanvas.getContext("2d")
-/* MATRIX */
-
-const canvas = document.getElementById("matrixCanvas")
-const ctx = canvas.getContext("2d")
-
-canvas.height = window.innerHeight
-canvas.width = window.innerWidth
-
-function resizeCanvas(){
-
-dpr = window.devicePixelRatio || 1
-
-canvas.width = window.innerWidth * dpr
-canvas.height = window.innerHeight * dpr
-
-textCanvas.width = window.innerWidth * dpr
-textCanvas.height = window.innerHeight * dpr
-
-ctx.setTransform(1,0,0,1,0,0)
-ctx.scale(dpr,dpr)
-
-textCtx.setTransform(1,0,0,1,0,0)
-textCtx.scale(dpr,dpr)
-
-resetMatrix()
-
-}
-window.addEventListener("resize",resizeCanvas)
-
-const textCanvas = document.getElementById("textCanvas")
-const textCtx = textCanvas.getContext("2d")
-
-textCanvas.height = window.innerHeight
-textCanvas.width = window.innerWidth
-
-const letters = "0123456789"
-
-const fontSize = 16
-
-const columns = canvas.width / fontSize
-
-const drops = []
-
-for(let x=0;x<columns;x++)
-drops[x]=1
-
-function drawMatrix(){
-
-ctx.fillStyle="rgba(0,0,0,0.05)"
-ctx.fillRect(0,0,canvas.width,canvas.height)
-
-ctx.fillStyle="#ff4da6"
-ctx.font=fontSize+"px monospace"
-
-for(let i=0;i<drops.length;i++){
-
-const text = letters.charAt(Math.floor(Math.random()*letters.length))
-
-ctx.fillText(text,i*fontSize,drops[i]*fontSize)
-
-if(drops[i]*fontSize > canvas.height && Math.random()>0.975)
-drops[i]=0
-
-drops[i]++
-
-}
-
-}
-
-/*soporte para celular*/
-function rebuildScene(){
-
-// detener matrix anterior
-clearInterval(matrixInterval)
-
-// limpiar todo
-particlesTexto = []
-particlesBorde = []
-
-ctx.clearRect(0,0,canvas.width,canvas.height)
-textCtx.clearRect(0,0,textCanvas.width,textCanvas.height)
-
-// reiniciar matrix
-resetMatrix()
-startMatrix()
-
-// reiniciar partículas si ya estaban activas
-if(fraseActual < frases.length){
-startParticles()
-}
-
-}
-
-window.addEventListener("resize", () => {
-
-setTimeout(() => {
-resizeCanvas()
-rebuildScene()
-}, 300)
-
-})
-let matrixInterval
-
-function startMatrix(){
-
-matrixInterval = setInterval(drawMatrix,35)
-
-}
-
-function resetMatrix(){
-
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
-
-const newColumns = Math.floor(canvas.width / fontSize)
-
-drops.length = 0
-
-for(let x=0;x<newColumns;x++){
-drops[x] = 1
-}
-
-}
-
-
-
-
-/* TEXTO */
-let dpr = window.devicePixelRatio || 1
-
-canvas.width = window.innerWidth * dpr
-canvas.height = window.innerHeight * dpr
-ctx.scale(dpr,dpr)
-
-textCanvas.width = window.innerWidth * dpr
-textCanvas.height = window.innerHeight * dpr
-textCtx.scale(dpr,dpr)
-
-/* MATRIZ DE LETRAS */
-
-const font = {
-
-H:[
-[1,0,1],
-[1,0,1],
-[1,1,1],
-[1,0,1],
-[1,0,1]
-],
-
-A:[
-[0,1,0],
-[1,0,1],
-[1,1,1],
-[1,0,1],
-[1,0,1]
-],
-
-P:[
-[1,1,0],
-[1,0,1],
-[1,1,0],
-[1,0,0],
-[1,0,0]
-],
-
-Y:[
-[1,0,1],
-[1,0,1],
-[0,1,0],
-[0,1,0],
-[0,1,0]
-],
-
-B:[
-[1,1,0],
-[1,0,1],
-[1,1,0],
-[1,0,1],
-[1,1,0]
-],
-
-I:[
-[1,1,1],
-[0,1,0],
-[0,1,0],
-[0,1,0],
-[1,1,1]
-],
-
-R:[
-[1,1,0],
-[1,0,1],
-[1,1,0],
-[1,0,1],
-[1,0,1]
-],
-
-T:[
-[1,1,1],
-[0,1,0],
-[0,1,0],
-[0,1,0],
-[0,1,0]
-],
-
-D:[
-[1,1,0],
-[1,0,1],
-[1,0,1],
-[1,0,1],
-[1,1,0]
-],
-
-E:[
-[1,1,1],
-[1,0,0],
-[1,1,0],
-[1,0,0],
-[1,1,1]
-],
-
-S:[
-[0,1,1],
-[1,0,0],
-[0,1,0],
-[0,0,1],
-[1,1,0]
-]
-
-}
-function animateLEDWord(word){
-
-let isMobile = window.innerWidth < 600
-
-const size = isMobile ? 12 : 20
-const spacing = isMobile ? 6 : 10
-
-const letterWidth = 3*(size+spacing)
-const startX = textCanvas.width/2 - (word.length*letterWidth)/2
-const startY = textCanvas.height/2 - 50
-
-let leds = []
-
-for(let l=0;l<word.length;l++){
-
-const letter = font[word[l]]
-
-if(!letter) continue
-
-for(let row=0;row<letter.length;row++){
-
-for(let col=0;col<letter[row].length;col++){
-
-if(letter[row][col]==1){
-
-leds.push({
-x: startX + l*120 + col*(size+spacing),
-y: startY + row*(size+spacing)
-})
-
-}
-
-}
-
-}
-
-}
-
-let i = 0
-
-function lightNext(){
-
-if(i >= leds.length) return
-
-const led = leds[i]
-
-textCtx.beginPath()
-textCtx.arc(led.x,led.y,size/2,0,Math.PI*2)
-textCtx.fillStyle="#ff4da6"
-textCtx.shadowBlur = 15
-textCtx.shadowColor = "#ff4da6"
-textCtx.fill()
-
-i++
-
-setTimeout(lightNext,30)
-
-}
-textCtx.clearRect(0,0,textCanvas.width,textCanvas.height)
-lightNext()
-
-}
-
-
-
-function showWords(){
-
-const words = ["HAPPY","BIRTHDAY","BESTY"]
-
-let index = 0
-
-function nextWord(){
-
-if(index >= words.length){
-
-setTimeout(startNextAnimation,2000)
-return
-
-}
-textCtx.clearRect(0,0,textCanvas.width,textCanvas.height)
-
-animateLEDWord(words[index])
-
-index++
-
-setTimeout(nextWord,3500)
-
-}
-
-nextWord()
-
-}
-
-/*nueva animacion*/
-/*variables*/
-let frases = [
-"Eres una persona encantadora",
-"Eres tan única y especial",
-"como lo es el Lamborghini Veneno",
-"Tan querida como el",
-"mundo del rally",
-"Tan hermosa como ",
-"un Porsche 912",
-"en cada una de sus generaciones",
-"una mirada tan fina", 
-"como un koenigsegg",
-"y un corazon tan tierno",
-"como un miata",
-"sigue con tu manera de ser",
-"te amamos como eres"
-]
-
-let fraseActual = 0
-
-/*code*/
-let hue = 0
-
-let particlesTexto = []
-let particlesBorde = []
-let visibleCount = 0
-function startNextAnimation(){
-
-clearInterval(matrixInterval)
-
-textCtx.clearRect(0,0,textCanvas.width,textCanvas.height)
-
-textCtx.fillStyle="black"
-textCtx.fillRect(0,0,textCanvas.width,textCanvas.height)
-
-setTimeout(startParticles,2000)
-
-}
-
-
-
-
-function drawParticles(){
-
-hue += 0.5
-
-
-textCtx.fillStyle="black"
-textCtx.fillRect(0,0,textCanvas.width,textCanvas.height)
-
-for(let p of particlesTexto){
-
-if(p.tx==null){
-
-p.vy += 0.03
-
-p.x+=p.vx
-p.y+=p.vy
-
-}else{
-
-p.x += (p.tx-p.x)*0.07
-p.y += (p.ty-p.y)*0.07
-
-}
-
-textCtx.beginPath()
-textCtx.arc(p.x,p.y,2,0,Math.PI*2)
-textCtx.fillStyle = `hsl(${hue},100%,60%)`
-textCtx.fill()
-
-}
-
-
-
-requestAnimationFrame(drawParticles)
-
-}
-
-
-
-function startParticles(){
-
-particlesTexto = []
-particlesBorde = []
-
-let isMobile = window.innerWidth < 600
-
-let total = isMobile ? 4000 : 5000
-let textoCount = isMobile ? 1000 : 1600
-
-for(let i = 0; i < total; i++){
-
-let p = {
-x: Math.random()*textCanvas.width,
-y: Math.random()*textCanvas.height,
-vx:(Math.random()-0.5)*1,
-vy:(Math.random()-0.5)*1,
-tx:null,
-ty:null
-}
-
-if(i < textoCount){
-particlesTexto.push(p)
-}else{
-particlesBorde.push(p)
-}
-
-}
-
-// posicionar borde
-posicionarBordes()
-
-// 🔥 iniciar animación de partículas
-drawParticles()
-
-// 🔥 iniciar textos
-setTimeout(()=>{
-createTextParticles(frases[0])
-setTimeout(siguienteFrase,2000)
-},4000)
-
-}
-
-
-function posicionarBordes(){
-
-let margin = 20 // ≈ 5mm visual
-
-for(let p of particlesBorde){
-
-let zona = Math.floor(Math.random()*4)
-
-// arriba
-if(zona===0){
-p.x = Math.random()*textCanvas.width
-p.y = Math.random()*margin
-}
-
-// abajo
-else if(zona===1){
-p.x = Math.random()*textCanvas.width
-p.y = textCanvas.height - Math.random()*margin
-}
-
-// izquierda
-else if(zona===2){
-p.x = Math.random()*margin
-p.y = Math.random()*textCanvas.height
-}
-
-// derecha
-else{
-p.x = textCanvas.width - Math.random()*margin
-p.y = Math.random()*textCanvas.height
-}
-
-// movimiento suave dentro de la zona
-p.vx = (Math.random()-0.5)*0.5
-p.vy = (Math.random()-0.5)*0.5
-
-}
-
-}
-
-
-function createTextParticles(message){
-
-// reiniciar destinos
-for(let p of particlesTexto){
-p.tx = null
-p.ty = null
-}
-
-// usar canvas normal (sin dpr)
-bufferCanvas.width = textCanvas.width / dpr
-bufferCanvas.height = textCanvas.height / dpr
-
-bufferCtx.clearRect(0,0,bufferCanvas.width,bufferCanvas.height)
-
-bufferCtx.fillStyle="white"
-let fontSizeResponsive = window.innerWidth < 600 ? 90 : 140
-bufferCtx.font = `bold ${fontSizeResponsive}px Arial`
-bufferCtx.textAlign="center"
-bufferCtx.textBaseline="middle"
-
-// 🔥 dividir texto en líneas automáticamente
-let words = message.split(" ")
-let lines = []
-let currentLine = ""
-
-for(let word of words){
-
-  let testLine = currentLine + word + " "
-  let metrics = bufferCtx.measureText(testLine)
-
-  if(metrics.width > bufferCanvas.width * 0.7){
-    lines.push(currentLine)
-    currentLine = word + " "
-  }else{
-    currentLine = testLine
+const matrixCanvas = document.getElementById("matrixCanvas");
+const textCanvas = document.getElementById("textCanvas");
+const musicToggle = document.getElementById("musicToggle");
+const soundtrack = document.getElementById("soundtrack");
+const rotateMessage = document.getElementById("rotateMessage");
+const introCopy = document.querySelector(".intro-copy");
+const album = document.getElementById("album");
+const albumTrack = document.getElementById("albumTrack");
+const albumBanner = document.getElementById("albumBanner");
+const albumPrompt = document.getElementById("albumPrompt");
+const albumCountdown = document.getElementById("albumCountdown");
+const finalScene = document.getElementById("finalScene");
+const curtainTop = document.getElementById("curtainTop");
+const curtainBottom = document.getElementById("curtainBottom");
+const heartCaption = document.getElementById("heartCaption");
+const albumCards = Array.from(document.querySelectorAll(".memory-card"));
+const albumImages = Array.from(document.querySelectorAll(".photo"));
+const debugParams = new URLSearchParams(window.location.search);
+const debugStage = debugParams.get("stage");
+const debugFreeze = debugParams.get("freeze") === "1";
+
+const matrixCtx = matrixCanvas.getContext("2d");
+const textCtx = textCanvas.getContext("2d");
+
+const state = {
+  dpr: Math.min(window.devicePixelRatio || 1, 2),
+  matrixDrops: [],
+  matrixFontSize: 16,
+  matrixTimer: null,
+  messageFrame: null,
+  phase: "intro",
+  resizeTimer: null,
+  phraseTimer: null,
+  albumTimer: null,
+  phraseIndex: 0,
+  currentBoard: null,
+  albumCountdownStarted: false,
+  albumHeartMode: false,
+  musicReady: false,
+  musicMissing: false,
+  musicPlaying: false
+};
+
+const ledFont = {
+  H: [[1, 0, 1], [1, 0, 1], [1, 1, 1], [1, 0, 1], [1, 0, 1]],
+  A: [[0, 1, 0], [1, 0, 1], [1, 1, 1], [1, 0, 1], [1, 0, 1]],
+  P: [[1, 1, 0], [1, 0, 1], [1, 1, 0], [1, 0, 0], [1, 0, 0]],
+  Y: [[1, 0, 1], [1, 0, 1], [0, 1, 0], [0, 1, 0], [0, 1, 0]],
+  B: [[1, 1, 0], [1, 0, 1], [1, 1, 0], [1, 0, 1], [1, 1, 0]],
+  I: [[1, 1, 1], [0, 1, 0], [0, 1, 0], [0, 1, 0], [1, 1, 1]],
+  R: [[1, 1, 0], [1, 0, 1], [1, 1, 0], [1, 0, 1], [1, 0, 1]],
+  T: [[1, 1, 1], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0]],
+  D: [[1, 1, 0], [1, 0, 1], [1, 0, 1], [1, 0, 1], [1, 1, 0]],
+  E: [[1, 1, 1], [1, 0, 0], [1, 1, 0], [1, 0, 0], [1, 1, 1]],
+  S: [[0, 1, 1], [1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0]]
+};
+
+const ledWords = ["HAPPY", "BIRTHDAY", "BESTY"];
+const phrases = [
+  "Eres una persona encantadora",
+  "Eres tan unica y especial",
+  "como lo es un Lamborghini Veneno",
+  "Tan querida como el mundo del rally",
+  "Tan hermosa como un Porsche 912",
+  "con una mirada fina como un Koenigsegg",
+  "y un corazon tan tierno como un Miata",
+  "Gracias por ser tu",
+  "Te amamos como eres"
+];
+const lyricBackdropLines = [
+  "feliz cumpleanos besty",
+  "gracias por existir",
+  "mi persona favorita",
+  "siempre a tu lado",
+  "brillas bonito",
+  "eres luz en mi vida"
+];
+const debugPhraseIndex = Math.max(0, Math.min(phrases.length - 1, Number(debugParams.get("phrase") || 0)));
+const ledGlyphs = buildGlyphMap({
+  " ": "000/000/000/000/000/000/000",
+  "?": "01110/10001/00010/00100/00100/00000/00100",
+  A: "01110/10001/10001/11111/10001/10001/10001",
+  B: "11110/10001/10001/11110/10001/10001/11110",
+  C: "01111/10000/10000/10000/10000/10000/01111",
+  D: "11110/10001/10001/10001/10001/10001/11110",
+  E: "11111/10000/10000/11110/10000/10000/11111",
+  F: "11111/10000/10000/11110/10000/10000/10000",
+  G: "01111/10000/10000/10111/10001/10001/01110",
+  H: "10001/10001/10001/11111/10001/10001/10001",
+  I: "11111/00100/00100/00100/00100/00100/11111",
+  J: "00111/00010/00010/00010/10010/10010/01100",
+  K: "10001/10010/10100/11000/10100/10010/10001",
+  L: "10000/10000/10000/10000/10000/10000/11111",
+  M: "10001/11011/10101/10101/10001/10001/10001",
+  N: "10001/11001/10101/10011/10001/10001/10001",
+  O: "01110/10001/10001/10001/10001/10001/01110",
+  P: "11110/10001/10001/11110/10000/10000/10000",
+  Q: "01110/10001/10001/10001/10101/10010/01101",
+  R: "11110/10001/10001/11110/10100/10010/10001",
+  S: "01111/10000/10000/01110/00001/00001/11110",
+  T: "11111/00100/00100/00100/00100/00100/00100",
+  U: "10001/10001/10001/10001/10001/10001/01110",
+  V: "10001/10001/10001/10001/10001/01010/00100",
+  W: "10001/10001/10001/10101/10101/10101/01010",
+  X: "10001/10001/01010/00100/01010/10001/10001",
+  Y: "10001/10001/01010/00100/00100/00100/00100",
+  Z: "11111/00001/00010/00100/01000/10000/11111",
+  0: "01110/10001/10011/10101/11001/10001/01110",
+  1: "00100/01100/00100/00100/00100/00100/01110",
+  2: "01110/10001/00001/00010/00100/01000/11111",
+  3: "11110/00001/00001/01110/00001/00001/11110",
+  4: "00010/00110/01010/10010/11111/00010/00010",
+  5: "11111/10000/10000/11110/00001/00001/11110",
+  6: "01110/10000/10000/11110/10001/10001/01110",
+  7: "11111/00001/00010/00100/01000/01000/01000",
+  8: "01110/10001/10001/01110/10001/10001/01110",
+  9: "01110/10001/10001/01111/00001/00001/01110"
+});
+
+function setCanvasSize() {
+  state.dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+
+  matrixCanvas.width = width * state.dpr;
+  matrixCanvas.height = height * state.dpr;
+  textCanvas.width = width * state.dpr;
+  textCanvas.height = height * state.dpr;
+
+  matrixCanvas.style.width = `${width}px`;
+  matrixCanvas.style.height = `${height}px`;
+  textCanvas.style.width = `${width}px`;
+  textCanvas.style.height = `${height}px`;
+
+  matrixCtx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+  textCtx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+  matrixCtx.imageSmoothingEnabled = false;
+  textCtx.imageSmoothingEnabled = false;
+
+  resetMatrix();
+
+  if (state.phase === "message-led" || state.phase === "debug-message") {
+    state.currentBoard = createLedBoard(phrases[state.phraseIndex]);
+    drawLedBoard(state.currentBoard, 1, performance.now());
   }
-
 }
 
-lines.push(currentLine)
-
-// 🔥 dibujar líneas centradas
-let lineHeight = fontSizeResponsive * 1.2
-let startY = bufferCanvas.height/2 - (lines.length * lineHeight)/2
-
-for(let i=0;i<lines.length;i++){
-
-  bufferCtx.fillText(
-    lines[i],
-    bufferCanvas.width/2,
-    startY + i * lineHeight
-  )
-
+function resetMatrix() {
+  const columns = Math.ceil(window.innerWidth / state.matrixFontSize);
+  state.matrixDrops = Array.from(
+    { length: columns },
+    () => -Math.floor(Math.random() * 40) - 4
+  );
 }
 
-// leer datos correctamente
-let isMobile = window.innerWidth < 600
-let gap = 1
-let data = bufferCtx.getImageData(0,0,bufferCanvas.width,bufferCanvas.height).data
+function drawMatrix() {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
 
-// 🔥 mezclar puntos para mejor distribución
-let points = []
+  matrixCtx.fillStyle = "rgba(2, 3, 10, 0.12)";
+  matrixCtx.fillRect(0, 0, width, height);
+  matrixCtx.fillStyle = "#ff4da6";
+  matrixCtx.font = `${state.matrixFontSize}px monospace`;
 
-for(let y=0;y<bufferCanvas.height;y+=gap){
-  for(let x=0;x<bufferCanvas.width;x+=gap){
+  state.matrixDrops.forEach((drop, index) => {
+    const char = String(Math.floor(Math.random() * 10));
+    const x = index * state.matrixFontSize;
+    const y = drop * state.matrixFontSize;
 
-    let index = (y*bufferCanvas.width + x)*4
-    let alpha = data[index+3]
-
-    if(alpha > 80){
-      points.push({x,y})
+    if (y >= -state.matrixFontSize) {
+      matrixCtx.fillText(char, x, y);
     }
 
+    if (y > height && Math.random() > 0.975) {
+      state.matrixDrops[index] = -Math.floor(Math.random() * 24);
+    }
+
+    state.matrixDrops[index] += 1;
+  });
+}
+
+function startMatrix() {
+  stopMatrix();
+  matrixCtx.fillStyle = "#02030a";
+  matrixCtx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+  drawMatrix();
+  state.matrixTimer = window.setInterval(drawMatrix, 42);
+}
+
+function stopMatrix() {
+  if (state.matrixTimer) {
+    window.clearInterval(state.matrixTimer);
+    state.matrixTimer = null;
   }
 }
 
-// 🔥 mezclar aleatoriamente
-points.sort(() => Math.random() - 0.5)
+function clearTextCanvas() {
+  textCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+}
 
-let i = 0
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
 
-for(let p of particlesTexto){
+function cancelMessageFrame() {
+  if (state.messageFrame) {
+    window.cancelAnimationFrame(state.messageFrame);
+    state.messageFrame = null;
+  }
+}
 
-  if(points[i]){
-    p.tx = (points[i].x / bufferCanvas.width) * textCanvas.width
-    p.ty = (points[i].y / bufferCanvas.height) * textCanvas.height
-    i++
-  }else{
-    p.tx = textCanvas.width/2
-    p.ty = textCanvas.height/2
+function setCanvasLayers({ matrixVisible, textVisible }) {
+  matrixCanvas.style.display = matrixVisible ? "block" : "none";
+  textCanvas.style.display = textVisible ? "block" : "none";
+}
+
+function updateMusicToggle() {
+  if (!musicToggle) {
+    return;
   }
 
+  musicToggle.classList.toggle("is-playing", state.musicPlaying);
+  musicToggle.classList.toggle("is-missing", state.musicMissing);
+  musicToggle.setAttribute("aria-pressed", String(state.musicPlaying));
+
+  if (state.musicMissing) {
+    musicToggle.textContent = "Agregar cancion";
+    return;
+  }
+
+  musicToggle.textContent = state.musicPlaying ? "Pausar musica" : "Musica";
 }
 
+async function toggleMusic() {
+  if (!soundtrack || !musicToggle) {
+    return;
+  }
 
-// sobrantes al centro
-for(let j=i; j<particlesTexto.length; j++){
+  if (state.musicMissing || !state.musicReady) {
+    updateMusicToggle();
+    return;
+  }
 
-particlesTexto[j].tx = textCanvas.width/2
-particlesTexto[j].ty = textCanvas.height/2 + 80
+  if (state.musicPlaying) {
+    soundtrack.pause();
+    state.musicPlaying = false;
+    updateMusicToggle();
+    return;
+  }
 
+  try {
+    await soundtrack.play();
+    state.musicPlaying = true;
+  } catch (error) {
+    state.musicPlaying = false;
+  }
+
+  updateMusicToggle();
 }
 
-}
-function siguienteFrase(){
+function setupMusic() {
+  if (!soundtrack || !musicToggle) {
+    return;
+  }
 
-fraseActual++
+  soundtrack.volume = 0.58;
 
-if(fraseActual < frases.length){
+  const handleReady = () => {
+    state.musicReady = true;
+    state.musicMissing = false;
+    updateMusicToggle();
+  };
 
-createTextParticles(frases[fraseActual])
+  const handleMissing = () => {
+    state.musicReady = false;
+    state.musicPlaying = false;
+    state.musicMissing = true;
+    updateMusicToggle();
+  };
 
-setTimeout(siguienteFrase,8000)
-
-}else{
-
-setTimeout(explosionFinal,2000)
-
-}
-
-}
-
-function explosionFinal(){
-
-let centerX = textCanvas.width/2
-let centerY = textCanvas.height/2
-
-for(let p of particlesTexto){
-
-let angle = Math.random()*Math.PI*2
-let speed = Math.random()*6 + 2
-
-p.vx = Math.cos(angle)*speed
-p.vy = Math.sin(angle)*speed
-
-// pequeño caos
-p.vx += (Math.random()-0.5)*2
-p.vy += (Math.random()-0.5)*2
-
-p.tx = null
-p.ty = null
-
-}
-
-setTimeout(finalizarAnimacion,4000)
-
+  soundtrack.addEventListener("canplay", handleReady);
+  soundtrack.addEventListener("play", () => {
+    state.musicPlaying = true;
+    updateMusicToggle();
+  });
+  soundtrack.addEventListener("pause", () => {
+    state.musicPlaying = false;
+    updateMusicToggle();
+  });
+  soundtrack.addEventListener("error", handleMissing);
+  musicToggle.addEventListener("click", toggleMusic);
+  soundtrack.load();
+  window.setTimeout(() => {
+    if (!state.musicReady && (soundtrack.networkState === 3 || soundtrack.error)) {
+      handleMissing();
+    }
+  }, 1200);
+  updateMusicToggle();
 }
 
-/*iniciar la ultima parte*/
+async function animateLEDWord(word) {
+  const isMobile = window.innerWidth < 700;
+  const dotSize = isMobile ? 10 : 16;
+  const spacing = isMobile ? 8 : 10;
+  const letterGap = isMobile ? 18 : 30;
+  const rawLeds = [];
+  let cursorX = 0;
 
-function finalizarAnimacion(){
+  for (let letterIndex = 0; letterIndex < word.length; letterIndex += 1) {
+    const letter = ledFont[word[letterIndex]];
+    if (!letter) {
+      continue;
+    }
 
-// detener animación
-particlesTexto = []
-particlesBorde = []
+    for (let row = 0; row < letter.length; row += 1) {
+      for (let col = 0; col < letter[row].length; col += 1) {
+        if (letter[row][col] !== 1) {
+          continue;
+        }
 
-// ocultar canvas
-canvas.style.display = "none"
-textCanvas.style.display = "none"
-// cambiar fondo
-document.body.style.background = "#0b1d51"
+        rawLeds.push({
+          x: cursorX + col * (dotSize + spacing),
+          y: row * (dotSize + spacing)
+        });
+      }
+    }
 
-// mostrar album
-document.getElementById("album").style.display="flex"
+    cursorX += 3 * (dotSize + spacing) + letterGap;
+  }
 
-/*soporte para celular*/
+  const maxX = Math.max(...rawLeds.map((led) => led.x));
+  const maxY = Math.max(...rawLeds.map((led) => led.y));
+  const offsetX = (window.innerWidth - (maxX + dotSize)) / 2;
+  const offsetY = (window.innerHeight - (maxY + dotSize)) / 2;
+  const leds = rawLeds.map((led) => ({
+    x: Math.round(led.x + offsetX),
+    y: Math.round(led.y + offsetY)
+  }));
 
-window.addEventListener("orientationchange", () => {
+  clearTextCanvas();
 
-setTimeout(() => {
+  for (let index = 0; index < leds.length; index += 1) {
+    const led = leds[index];
 
-resizeCanvas()
-rebuildScene()
+    textCtx.beginPath();
+    textCtx.arc(led.x, led.y, dotSize / 2, 0, Math.PI * 2);
+    textCtx.fillStyle = "#ff4da6";
+    textCtx.shadowBlur = 16;
+    textCtx.shadowColor = "#ff4da6";
+    textCtx.fill();
 
-}, 300)
+    if (index % 2 === 0) {
+      await wait(24);
+    }
+  }
 
-})
-
+  textCtx.shadowBlur = 0;
+  await wait(900);
 }
+
+async function playIntroSequence() {
+  state.phase = "intro";
+  setCanvasLayers({ matrixVisible: true, textVisible: true });
+  introCopy.classList.add("is-visible");
+  startMatrix();
+
+  for (const word of ledWords) {
+    await animateLEDWord(word);
+    await wait(450);
+  }
+
+  introCopy.classList.remove("is-visible");
+  await wait(500);
+  startMessageSequence();
+}
+
+function drawRoundedRect(context, x, y, width, height, radius) {
+  context.beginPath();
+  context.moveTo(x + radius, y);
+  context.lineTo(x + width - radius, y);
+  context.quadraticCurveTo(x + width, y, x + width, y + radius);
+  context.lineTo(x + width, y + height - radius);
+  context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  context.lineTo(x + radius, y + height);
+  context.quadraticCurveTo(x, y + height, x, y + height - radius);
+  context.lineTo(x, y + radius);
+  context.quadraticCurveTo(x, y, x + radius, y);
+  context.closePath();
+}
+
+function buildGlyphMap(rawMap) {
+  const glyphs = {};
+
+  Object.entries(rawMap).forEach(([char, rows]) => {
+    glyphs[char] = rows.split("/");
+  });
+
+  return glyphs;
+}
+
+function normalizeLedMessage(message) {
+  return message
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9 ]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getGlyph(char) {
+  return ledGlyphs[char] || ledGlyphs["?"];
+}
+
+function getGlyphWidth(char) {
+  return char === " " ? 3 : getGlyph(char)[0].length;
+}
+
+function splitLongLedWord(word, maxChars) {
+  if (word.length <= maxChars) {
+    return [word];
+  }
+
+  const parts = [];
+
+  for (let index = 0; index < word.length; index += maxChars) {
+    parts.push(word.slice(index, index + maxChars));
+  }
+
+  return parts;
+}
+
+function wrapLedMessage(message, maxChars) {
+  const words = normalizeLedMessage(message)
+    .split(" ")
+    .flatMap((word) => splitLongLedWord(word, maxChars))
+    .filter(Boolean);
+  const lines = [];
+  let current = "";
+
+  words.forEach((word) => {
+    const candidate = current ? `${current} ${word}` : word;
+
+    if (candidate.length > maxChars && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = candidate;
+    }
+  });
+
+  if (current) {
+    lines.push(current);
+  }
+
+  return lines;
+}
+
+function measureLedColumns(line) {
+  let columns = 0;
+
+  for (let index = 0; index < line.length; index += 1) {
+    columns += getGlyphWidth(line[index]) + 1;
+  }
+
+  return Math.max(0, columns - 1);
+}
+
+function getLedPanel() {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const isMobile = width < 700;
+  const panelWidth = Math.min(width * 0.86, isMobile ? width - 28 : 760);
+  const panelHeight = Math.min(height * 0.66, isMobile ? height - 34 : 320);
+  const panelX = (width - panelWidth) / 2;
+  const panelY = (height - panelHeight) / 2;
+  const padding = isMobile ? 18 : 26;
+
+  return {
+    x: panelX,
+    y: panelY,
+    width: panelWidth,
+    height: panelHeight,
+    padding,
+    isMobile
+  };
+}
+
+function chooseLedLayout(message, panel) {
+  const normalizedMessage = normalizeLedMessage(message);
+  const innerWidth = panel.width - panel.padding * 2;
+  const innerHeight = panel.height - panel.padding * 2;
+  const maxChars = Math.min(22, Math.max(9, normalizedMessage.length));
+  let bestLayout = null;
+
+  for (let lineLength = maxChars; lineLength >= 8; lineLength -= 1) {
+    const lines = wrapLedMessage(normalizedMessage, lineLength);
+
+    if (!lines.length || lines.length > 4) {
+      continue;
+    }
+
+    const textCols = Math.max(...lines.map((line) => measureLedColumns(line)));
+    const textRows = lines.length * 7 + (lines.length - 1) * 2;
+    const pitch = Math.floor(Math.min(innerWidth / textCols, innerHeight / textRows));
+
+    if (pitch < 6) {
+      continue;
+    }
+
+    const gap = Math.max(1, Math.round(pitch * 0.16));
+    const cell = Math.max(4, pitch - gap);
+    const gridCols = Math.max(textCols, Math.floor((innerWidth + gap) / pitch));
+    const gridRows = Math.max(textRows, Math.floor((innerHeight + gap) / pitch));
+    const score = pitch * 12 - lines.length * 6 - textCols * 0.02;
+
+    if (!bestLayout || score > bestLayout.score) {
+      bestLayout = {
+        lines,
+        textCols,
+        textRows,
+        pitch,
+        cell,
+        gap,
+        gridCols,
+        gridRows,
+        score
+      };
+    }
+  }
+
+  if (bestLayout) {
+    return bestLayout;
+  }
+
+  const fallbackLines = wrapLedMessage(normalizedMessage, 8);
+
+  return {
+    lines: fallbackLines,
+    textCols: Math.max(...fallbackLines.map((line) => measureLedColumns(line))),
+    textRows: fallbackLines.length * 7 + (fallbackLines.length - 1) * 2,
+    pitch: 6,
+    cell: 5,
+    gap: 1,
+    gridCols: Math.floor((innerWidth + 1) / 6),
+    gridRows: Math.floor((innerHeight + 1) / 6)
+  };
+}
+
+function createLedBoard(message) {
+  const panel = getLedPanel();
+  const layout = chooseLedLayout(message, panel);
+  const gridWidth = layout.gridCols * layout.pitch - layout.gap;
+  const gridHeight = layout.gridRows * layout.pitch - layout.gap;
+  const gridX = panel.x + (panel.width - gridWidth) / 2;
+  const gridY = panel.y + (panel.height - gridHeight) / 2;
+  const textStartRow = Math.floor((layout.gridRows - layout.textRows) / 2);
+  const activeMap = new Set();
+  const leds = [];
+
+  layout.lines.forEach((line, lineIndex) => {
+    const baseRow = textStartRow + lineIndex * 9;
+    const lineWidth = measureLedColumns(line);
+    let cursorCol = Math.floor((layout.gridCols - lineWidth) / 2);
+
+    for (let charIndex = 0; charIndex < line.length; charIndex += 1) {
+      const char = line[charIndex];
+      const glyph = getGlyph(char);
+
+      if (char !== " ") {
+        glyph.forEach((row, rowIndex) => {
+          for (let colIndex = 0; colIndex < row.length; colIndex += 1) {
+            if (row[colIndex] === "1") {
+              activeMap.add(`${baseRow + rowIndex}:${cursorCol + colIndex}`);
+            }
+          }
+        });
+      }
+
+      cursorCol += getGlyphWidth(char) + 1;
+    }
+  });
+
+  for (let row = 0; row < layout.gridRows; row += 1) {
+    for (let col = 0; col < layout.gridCols; col += 1) {
+      leds.push({
+        x: gridX + col * layout.pitch + layout.cell / 2,
+        y: gridY + row * layout.pitch + layout.cell / 2,
+        active: activeMap.has(`${row}:${col}`)
+      });
+    }
+  }
+
+  const activeIndices = [];
+
+  leds.forEach((led, index) => {
+    if (led.active) {
+      activeIndices.push(index);
+    }
+  });
+
+  activeIndices.sort((left, right) => {
+    const leftLed = leds[left];
+    const rightLed = leds[right];
+    return (leftLed.y - rightLed.y) || (leftLed.x - rightLed.x);
+  });
+
+  return {
+    panel,
+    leds,
+    activeIndices,
+    cell: layout.cell,
+    pitch: layout.pitch,
+    radius: Math.max(2, layout.cell * 0.34),
+    message: normalizeLedMessage(message)
+  };
+}
+
+function drawMessageBackdrop(now, board) {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const panel = board.panel;
+  const baseGradient = textCtx.createLinearGradient(0, 0, width, height);
+  baseGradient.addColorStop(0, "#03050f");
+  baseGradient.addColorStop(0.52, "#09142f");
+  baseGradient.addColorStop(1, "#040812");
+  textCtx.fillStyle = baseGradient;
+  textCtx.fillRect(0, 0, width, height);
+
+  const orbA = {
+    x: width * 0.22 + Math.sin(now / 1700) * width * 0.08,
+    y: height * 0.3 + Math.cos(now / 1400) * height * 0.06,
+    radius: width * 0.24,
+    color: "rgba(255, 111, 175, 0.18)"
+  };
+  const orbB = {
+    x: width * 0.77 + Math.cos(now / 1600) * width * 0.07,
+    y: height * 0.68 + Math.sin(now / 1500) * height * 0.05,
+    radius: width * 0.22,
+    color: "rgba(99, 245, 255, 0.16)"
+  };
+
+  [orbA, orbB].forEach((orb) => {
+    const glow = textCtx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
+    glow.addColorStop(0, orb.color);
+    glow.addColorStop(1, "rgba(0, 0, 0, 0)");
+    textCtx.fillStyle = glow;
+    textCtx.fillRect(0, 0, width, height);
+  });
+
+  textCtx.save();
+  textCtx.strokeStyle = "rgba(99,245,255,0.12)";
+  textCtx.lineWidth = 2;
+  textCtx.beginPath();
+
+  for (let x = -40; x <= width + 40; x += 10) {
+    const y = height * 0.52 + Math.sin((x + now * 0.12) / 30) * 12;
+    if (x === -40) {
+      textCtx.moveTo(x, y);
+    } else {
+      textCtx.lineTo(x, y);
+    }
+  }
+
+  textCtx.stroke();
+  textCtx.restore();
+
+  textCtx.save();
+  textCtx.textBaseline = "middle";
+  textCtx.font = `700 ${Math.max(20, Math.min(width * 0.055, 44))}px Trebuchet MS, Arial, sans-serif`;
+  textCtx.shadowBlur = 18;
+
+  const lanes = [
+    panel.y - 34,
+    panel.y + panel.height * 0.3,
+    panel.y + panel.height * 0.68,
+    panel.y + panel.height + 34
+  ];
+
+  lanes.forEach((laneY, laneIndex) => {
+    const phrase = lyricBackdropLines[(state.phraseIndex + laneIndex) % lyricBackdropLines.length].toUpperCase();
+    const repeated = `${phrase}      ${phrase}      `;
+    const textWidth = textCtx.measureText(repeated).width;
+    const speed = 34 + laneIndex * 10;
+    const color = laneIndex % 2 === 0 ? "rgba(255,111,175,0.11)" : "rgba(99,245,255,0.1)";
+    const direction = laneIndex % 2 === 0 ? 1 : -1;
+    const travel = ((now / 1000) * speed * direction) % textWidth;
+
+    textCtx.fillStyle = color;
+    textCtx.shadowColor = color;
+
+    if (direction > 0) {
+      for (let x = -textWidth + travel; x < width + textWidth; x += textWidth) {
+        textCtx.fillText(repeated, x, laneY);
+      }
+    } else {
+      for (let x = width - travel; x > -textWidth; x -= textWidth) {
+        textCtx.fillText(repeated, x, laneY);
+      }
+    }
+  });
+
+  textCtx.restore();
+
+  textCtx.save();
+  textCtx.fillStyle = "rgba(255,255,255,0.025)";
+  for (let y = 0; y < height; y += 4) {
+    textCtx.fillRect(0, y, width, 1);
+  }
+  textCtx.restore();
+}
+
+function drawLedBoard(board, progress, now) {
+  clearTextCanvas();
+  drawMessageBackdrop(now, board);
+
+  const { panel, leds, activeIndices } = board;
+  const litCount = Math.floor(activeIndices.length * progress);
+  const pulse = 0.94 + Math.sin(now / 220) * 0.06;
+
+  textCtx.save();
+  drawRoundedRect(textCtx, panel.x, panel.y, panel.width, panel.height, 28);
+  textCtx.fillStyle = "rgba(7, 13, 36, 0.9)";
+  textCtx.fill();
+  textCtx.strokeStyle = "rgba(255,255,255,0.1)";
+  textCtx.lineWidth = 1;
+  textCtx.stroke();
+
+  drawRoundedRect(textCtx, panel.x + 10, panel.y + 10, panel.width - 20, panel.height - 20, 22);
+  textCtx.fillStyle = "rgba(1, 5, 14, 0.42)";
+  textCtx.fill();
+
+  textCtx.fillStyle = "rgba(99, 245, 255, 0.1)";
+  textCtx.fillRect(panel.x + 16, panel.y + 14, panel.width - 32, 6);
+  textCtx.restore();
+
+  leds.forEach((led) => {
+    textCtx.beginPath();
+    textCtx.arc(led.x, led.y, board.radius * 0.62, 0, Math.PI * 2);
+    textCtx.fillStyle = led.active ? "rgba(255, 124, 181, 0.14)" : "rgba(255,255,255,0.05)";
+    textCtx.fill();
+  });
+
+  for (let index = 0; index < litCount; index += 1) {
+    const led = leds[activeIndices[index]];
+    textCtx.beginPath();
+    textCtx.arc(led.x, led.y, board.radius * 1.85, 0, Math.PI * 2);
+    textCtx.fillStyle = `rgba(255, 111, 175, ${0.12 * pulse})`;
+    textCtx.fill();
+
+    textCtx.beginPath();
+    textCtx.arc(led.x, led.y, board.radius * 1.08, 0, Math.PI * 2);
+    textCtx.fillStyle = `rgba(255, 126, 186, ${0.96 * pulse})`;
+    textCtx.fill();
+
+    textCtx.beginPath();
+    textCtx.arc(led.x, led.y, board.radius * 0.44, 0, Math.PI * 2);
+    textCtx.fillStyle = "#fff6fb";
+    textCtx.fill();
+  }
+}
+
+function animateLedPhrase(message) {
+  cancelMessageFrame();
+  state.currentBoard = createLedBoard(message);
+
+  return new Promise((resolve) => {
+    const turnOnDuration = 960;
+    const holdDuration = 2500 + Math.min(3400, state.currentBoard.message.length * 95);
+    const start = performance.now();
+
+    function frame(now) {
+      const elapsed = now - start;
+      const progress = Math.min(1, elapsed / turnOnDuration);
+
+      drawLedBoard(state.currentBoard, progress, now);
+
+      if (elapsed < turnOnDuration + holdDuration) {
+        state.messageFrame = window.requestAnimationFrame(frame);
+        return;
+      }
+
+      resolve();
+    }
+
+    state.messageFrame = window.requestAnimationFrame(frame);
+  });
+}
+
+async function startMessageSequence() {
+  state.phase = "message-led";
+  state.phraseIndex = 0;
+  setCanvasLayers({ matrixVisible: false, textVisible: true });
+  stopMatrix();
+  matrixCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  clearTextCanvas();
+
+  for (let index = 0; index < phrases.length; index += 1) {
+    state.phraseIndex = index;
+    await animateLedPhrase(phrases[index]);
+    await wait(420);
+  }
+
+  cancelMessageFrame();
+  clearTextCanvas();
+  await wait(220);
+  showAlbum();
+}
+
+function clearPhraseTimer() {
+  if (state.phraseTimer) {
+    window.clearTimeout(state.phraseTimer);
+    state.phraseTimer = null;
+  }
+}
+
+function stopMessageSequence() {
+  cancelMessageFrame();
+  clearPhraseTimer();
+}
+
+function setAlbumMessage(prompt = "", countdown = "") {
+  albumPrompt.textContent = prompt;
+  albumCountdown.textContent = countdown;
+  albumBanner.classList.toggle("is-visible", Boolean(prompt || countdown));
+}
+
+function clearAlbumTimer() {
+  if (state.albumTimer) {
+    window.clearTimeout(state.albumTimer);
+    state.albumTimer = null;
+  }
+}
+
+function buildCurtains() {
+  curtainTop.innerHTML = "";
+  curtainBottom.innerHTML = "";
+
+  albumCards.forEach((card, index) => {
+    const tile = card.cloneNode(true);
+    tile.classList.remove("memory-card");
+    tile.classList.add("curtain-card");
+
+    if (index < 10) {
+      curtainTop.appendChild(tile);
+    } else {
+      curtainBottom.appendChild(tile);
+    }
+  });
+}
+
+async function playFinalScene() {
+  state.albumHeartMode = true;
+  album.classList.add("is-heart-mode");
+  albumTrack.classList.add("is-locked", "is-hidden");
+  buildCurtains();
+  finalScene.classList.remove("is-opening", "is-closing", "show-heart", "show-beat");
+  finalScene.classList.add("is-visible");
+  heartCaption.classList.remove("is-visible");
+
+  void finalScene.offsetWidth;
+
+  finalScene.classList.add("is-closing");
+  await wait(820);
+
+  finalScene.classList.add("show-beat");
+  await wait(180);
+  finalScene.classList.remove("is-closing");
+  curtainTop.style.opacity = "1";
+  curtainBottom.style.opacity = "1";
+  finalScene.classList.add("is-opening");
+  await wait(2860);
+
+  curtainTop.style.transform = "translateY(-140%)";
+  curtainBottom.style.transform = "translateY(140%)";
+  curtainTop.style.opacity = "0";
+  curtainBottom.style.opacity = "0";
+  finalScene.classList.add("show-heart");
+  heartCaption.classList.add("is-visible");
+  setAlbumMessage("", "");
+}
+
+async function startAlbumCountdown() {
+  if (state.albumCountdownStarted || state.albumHeartMode) {
+    return;
+  }
+
+  state.albumCountdownStarted = true;
+  albumTrack.classList.add("is-locked");
+  setAlbumMessage("Espera", "3");
+
+  for (const number of ["3", "2", "1"]) {
+    setAlbumMessage("Espera", number);
+    await wait(1000);
+  }
+
+  setAlbumMessage("Espera", "");
+  await playFinalScene();
+}
+
+function handleAlbumScroll() {
+  if (state.phase !== "album" || state.albumCountdownStarted || state.albumHeartMode) {
+    return;
+  }
+
+  const nearEnd = albumTrack.scrollLeft + albumTrack.clientWidth >= albumTrack.scrollWidth - 32;
+  if (nearEnd) {
+    startAlbumCountdown();
+  }
+}
+
+function showParticleDebug() {
+  state.phase = debugFreeze ? "debug-message" : "message-led";
+  state.phraseIndex = Math.min(debugPhraseIndex, phrases.length - 1);
+  setCanvasLayers({ matrixVisible: false, textVisible: true });
+  stopMatrix();
+  matrixCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  state.currentBoard = createLedBoard(phrases[state.phraseIndex]);
+  drawLedBoard(state.currentBoard, debugFreeze ? 1 : 0.92, performance.now());
+}
+
+function showFinalDebugState() {
+  showAlbum();
+  state.albumHeartMode = true;
+  album.classList.add("is-heart-mode");
+  albumTrack.classList.add("is-locked", "is-hidden");
+  buildCurtains();
+  finalScene.classList.add("is-visible", "show-beat", "show-heart", "is-opening");
+  curtainTop.style.transform = "translateY(-140%)";
+  curtainBottom.style.transform = "translateY(140%)";
+  curtainTop.style.opacity = "0";
+  curtainBottom.style.opacity = "0";
+  heartCaption.classList.add("is-visible");
+  setAlbumMessage("", "");
+}
+
+function runDebugStage() {
+  if (debugStage === "album") {
+    showAlbum();
+    return;
+  }
+
+  if (debugStage === "heart") {
+    showAlbum();
+    window.setTimeout(() => {
+      playFinalScene();
+    }, 120);
+    return;
+  }
+
+  if (debugStage === "heart-static") {
+    showFinalDebugState();
+    return;
+  }
+
+  if (debugStage === "particles") {
+    showParticleDebug();
+    return;
+  }
+
+  playIntroSequence();
+}
+
+function showAlbum() {
+  stopMessageSequence();
+  clearTextCanvas();
+  setCanvasLayers({ matrixVisible: false, textVisible: false });
+  clearAlbumTimer();
+  state.albumCountdownStarted = false;
+  state.albumHeartMode = false;
+  album.classList.remove("is-heart-mode");
+  albumTrack.classList.remove("is-locked", "is-heart-mode", "is-hidden");
+  albumTrack.scrollLeft = 0;
+  finalScene.classList.remove("is-visible", "is-closing", "is-opening", "show-heart");
+  finalScene.classList.remove("show-beat");
+  curtainTop.style.removeProperty("transform");
+  curtainBottom.style.removeProperty("transform");
+  curtainTop.style.removeProperty("opacity");
+  curtainBottom.style.removeProperty("opacity");
+  curtainTop.innerHTML = "";
+  curtainBottom.innerHTML = "";
+  heartCaption.classList.remove("is-visible");
+  setAlbumMessage("", "");
+  album.classList.add("is-visible");
+  state.phase = "album";
+}
+
+function updateOrientationMessage() {
+  const isPortraitMobile = window.innerWidth < 900 && window.innerHeight > window.innerWidth;
+  rotateMessage.classList.toggle("is-visible", isPortraitMobile);
+}
+
+function handleResize() {
+  window.clearTimeout(state.resizeTimer);
+  state.resizeTimer = window.setTimeout(() => {
+    setCanvasSize();
+    updateOrientationMessage();
+
+  }, 150);
+}
+
+function createPlaceholderDataUri(index) {
+  const hueA = (index * 27 + 320) % 360;
+  const hueB = (hueA + 60) % 360;
+  const number = String(index + 1).padStart(2, "0");
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="hsl(${hueA} 88% 68%)" />
+          <stop offset="100%" stop-color="hsl(${hueB} 86% 70%)" />
+        </linearGradient>
+        <radialGradient id="glow" cx="30%" cy="20%" r="65%">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.38)" />
+          <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+        </radialGradient>
+      </defs>
+      <rect width="800" height="1000" rx="72" fill="url(#bg)" />
+      <rect width="800" height="1000" rx="72" fill="url(#glow)" />
+      <circle cx="400" cy="360" r="170" fill="rgba(255,255,255,0.14)" />
+      <text x="400" y="420" text-anchor="middle" font-size="170" font-family="Arial, sans-serif" font-weight="700" fill="rgba(255,255,255,0.92)">${number}</text>
+      <text x="400" y="720" text-anchor="middle" font-size="54" font-family="Arial, sans-serif" fill="rgba(255,255,255,0.88)">Recuerdo</text>
+      <text x="400" y="790" text-anchor="middle" font-size="48" font-family="Arial, sans-serif" fill="rgba(255,255,255,0.72)">para reemplazar luego</text>
+    </svg>
+  `;
+
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+function applyPlaceholderImage(image, index) {
+  if (image.dataset.placeholderApplied === "1") {
+    return;
+  }
+
+  image.dataset.placeholderApplied = "1";
+  image.classList.remove("is-missing");
+  image.src = createPlaceholderDataUri(index);
+}
+
+function wireImageFallbacks() {
+  albumImages.forEach((image, index) => {
+    const handleMissing = () => applyPlaceholderImage(image, index);
+
+    if (image.complete && (!image.naturalWidth || image.naturalWidth === 0)) {
+      handleMissing();
+    }
+
+    image.addEventListener("error", handleMissing, { once: true });
+  });
+}
+
+function init() {
+  setCanvasSize();
+  updateOrientationMessage();
+  setupMusic();
+  wireImageFallbacks();
+  albumTrack.addEventListener("scroll", handleAlbumScroll, { passive: true });
+  runDebugStage();
+}
+
+window.addEventListener("resize", handleResize);
+window.addEventListener("orientationchange", handleResize);
+window.addEventListener("load", init);

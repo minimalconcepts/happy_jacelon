@@ -57,15 +57,15 @@ const ledFont = {
 
 const ledWords = ["HAPPY", "BIRTHDAY", "BESTY"];
 const phrases = [
-  "Eres una persona encantadora",
-  "Eres tan unica y especial",
-  "como lo es un Lamborghini Veneno",
-  "Tan querida como el mundo del rally",
-  "Tan hermosa como un Porsche 912",
-  "con una mirada fina como un Koenigsegg",
-  "y un corazon tan tierno como un Miata",
-  "Gracias por ser tu",
-  "Te amamos como eres"
+  "Eres tan encantadora",
+  "Eres tan unica|y especial",
+  "Como un|Lamborghini Veneno",
+  "Tan querida|como el rally",
+  "Tan hermosa|como un Porsche 912",
+  "Mirada fina|tipo Koenigsegg",
+  "Corazon tierno|como un Miata",
+  "Gracias|por ser tu",
+  "Te amamos|como eres"
 ];
 const lyricBackdropLines = [
   "feliz cumpleanos besty",
@@ -399,7 +399,7 @@ function buildGlyphMap(rawMap) {
   return glyphs;
 }
 
-function normalizeLedMessage(message) {
+function normalizeLedChunk(message) {
   return message
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -407,6 +407,10 @@ function normalizeLedMessage(message) {
     .replace(/[^A-Z0-9 ]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function normalizeLedMessage(message) {
+  return normalizeLedChunk(String(message).replace(/[|\n]+/g, " "));
 }
 
 function getGlyph(char) {
@@ -432,27 +436,35 @@ function splitLongLedWord(word, maxChars) {
 }
 
 function wrapLedMessage(message, maxChars) {
-  const words = normalizeLedMessage(message)
-    .split(" ")
-    .flatMap((word) => splitLongLedWord(word, maxChars))
-    .filter(Boolean);
   const lines = [];
-  let current = "";
+  const blocks = String(message)
+    .replace(/\|/g, "\n")
+    .split(/\n+/)
+    .map((chunk) => normalizeLedChunk(chunk))
+    .filter(Boolean);
 
-  words.forEach((word) => {
-    const candidate = current ? `${current} ${word}` : word;
+  blocks.forEach((block) => {
+    const words = block
+      .split(" ")
+      .flatMap((word) => splitLongLedWord(word, maxChars))
+      .filter(Boolean);
+    let current = "";
 
-    if (candidate.length > maxChars && current) {
+    words.forEach((word) => {
+      const candidate = current ? `${current} ${word}` : word;
+
+      if (candidate.length > maxChars && current) {
+        lines.push(current);
+        current = word;
+      } else {
+        current = candidate;
+      }
+    });
+
+    if (current) {
       lines.push(current);
-      current = word;
-    } else {
-      current = candidate;
     }
   });
-
-  if (current) {
-    lines.push(current);
-  }
 
   return lines;
 }
@@ -672,10 +684,10 @@ function drawMessageBackdrop(now, board) {
   textCtx.shadowBlur = 18;
 
   const lanes = [
-    panel.y - 34,
+    Math.max(30, panel.y - 30),
     panel.y + panel.height * 0.3,
     panel.y + panel.height * 0.68,
-    panel.y + panel.height + 34
+    Math.min(height - 28, panel.y + panel.height + 28)
   ];
 
   lanes.forEach((laneY, laneIndex) => {

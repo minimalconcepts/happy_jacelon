@@ -46,7 +46,9 @@ const state = {
   isPaused: false,
   appStarted: false,
   resumeMusicOnUnpause: false,
-  launchApproved: false
+  launchApproved: false,
+  messageBackdropCanvas: null,
+  messageBackdropKey: ""
 };
 
 const ledFont = {
@@ -147,6 +149,7 @@ function setCanvasSize() {
   textCtx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
   matrixCtx.imageSmoothingEnabled = false;
   textCtx.imageSmoothingEnabled = false;
+  invalidateMessageBackdrop();
 
   resetMatrix();
 
@@ -207,6 +210,11 @@ function stopMatrix() {
 
 function clearTextCanvas() {
   textCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+}
+
+function invalidateMessageBackdrop() {
+  state.messageBackdropCanvas = null;
+  state.messageBackdropKey = "";
 }
 
 async function wait(ms) {
@@ -865,98 +873,131 @@ function createLedBoard(message) {
   };
 }
 
-function drawMessageBackdrop(now, board) {
+function renderMessageBackdrop(context, board) {
   const width = window.innerWidth;
   const height = window.innerHeight;
   const panel = board.panel;
-  const baseGradient = textCtx.createLinearGradient(0, 0, width, height);
+  const baseGradient = context.createLinearGradient(0, 0, width, height);
   baseGradient.addColorStop(0, "#03050f");
-  baseGradient.addColorStop(0.52, "#09142f");
+  baseGradient.addColorStop(0.52, "#14112a");
   baseGradient.addColorStop(1, "#040812");
-  textCtx.fillStyle = baseGradient;
-  textCtx.fillRect(0, 0, width, height);
+  context.fillStyle = baseGradient;
+  context.fillRect(0, 0, width, height);
 
   const orbA = {
-    x: width * 0.22 + Math.sin(now / 1700) * width * 0.08,
-    y: height * 0.3 + Math.cos(now / 1400) * height * 0.06,
+    x: width * 0.22,
+    y: height * 0.3,
     radius: width * 0.24,
     color: "rgba(255, 111, 175, 0.18)"
   };
   const orbB = {
-    x: width * 0.77 + Math.cos(now / 1600) * width * 0.07,
-    y: height * 0.68 + Math.sin(now / 1500) * height * 0.05,
+    x: width * 0.77,
+    y: height * 0.68,
     radius: width * 0.22,
     color: "rgba(255, 198, 110, 0.16)"
   };
 
   [orbA, orbB].forEach((orb) => {
-    const glow = textCtx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
+    const glow = context.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
     glow.addColorStop(0, orb.color);
     glow.addColorStop(1, "rgba(0, 0, 0, 0)");
-    textCtx.fillStyle = glow;
-    textCtx.fillRect(0, 0, width, height);
+    context.fillStyle = glow;
+    context.fillRect(0, 0, width, height);
   });
 
-  textCtx.save();
-  textCtx.strokeStyle = "rgba(255,198,110,0.12)";
-  textCtx.lineWidth = 2;
-  textCtx.beginPath();
+  context.save();
+  context.strokeStyle = "rgba(255,198,110,0.11)";
+  context.lineWidth = 2;
+  context.beginPath();
 
   for (let x = -40; x <= width + 40; x += 10) {
-    const y = height * 0.52 + Math.sin((x + now * 0.12) / 30) * 12;
+    const y = height * 0.52 + Math.sin(x / 32) * 10;
     if (x === -40) {
-      textCtx.moveTo(x, y);
+      context.moveTo(x, y);
     } else {
-      textCtx.lineTo(x, y);
+      context.lineTo(x, y);
     }
   }
 
-  textCtx.stroke();
-  textCtx.restore();
+  context.stroke();
+  context.restore();
 
-  textCtx.save();
-  textCtx.textBaseline = "middle";
-  textCtx.font = `700 ${Math.max(20, Math.min(width * 0.055, 44))}px Trebuchet MS, Arial, sans-serif`;
-  textCtx.shadowBlur = 18;
+  context.save();
+  context.textBaseline = "middle";
+  context.textAlign = "center";
+  context.font = `700 ${Math.max(18, Math.min(width * 0.05, 40))}px Trebuchet MS, Arial, sans-serif`;
+  context.shadowBlur = 0;
 
   const lanes = [
     Math.max(30, panel.y - 30),
     panel.y + panel.height * 0.3,
-    panel.y + panel.height * 0.68,
-    Math.min(height - 28, panel.y + panel.height + 28)
+    panel.y + panel.height * 0.7
   ];
 
   lanes.forEach((laneY, laneIndex) => {
     const phrase = lyricBackdropLines[(state.phraseIndex + laneIndex) % lyricBackdropLines.length].toUpperCase();
-    const repeated = `${phrase}      ${phrase}      `;
-    const textWidth = textCtx.measureText(repeated).width;
-    const speed = 34 + laneIndex * 10;
     const color = laneIndex % 2 === 0 ? "rgba(255,111,175,0.11)" : "rgba(255,198,110,0.1)";
-    const direction = laneIndex % 2 === 0 ? 1 : -1;
-    const travel = ((now / 1000) * speed * direction) % textWidth;
-
-    textCtx.fillStyle = color;
-    textCtx.shadowColor = color;
-
-    if (direction > 0) {
-      for (let x = -textWidth + travel; x < width + textWidth; x += textWidth) {
-        textCtx.fillText(repeated, x, laneY);
-      }
-    } else {
-      for (let x = width - travel; x > -textWidth; x -= textWidth) {
-        textCtx.fillText(repeated, x, laneY);
-      }
-    }
+    context.fillStyle = color;
+    context.fillText(phrase, width * (laneIndex % 2 === 0 ? 0.34 : 0.68), laneY);
   });
 
-  textCtx.restore();
+  context.restore();
 
-  textCtx.save();
-  textCtx.fillStyle = "rgba(255,255,255,0.025)";
+  context.save();
+  context.fillStyle = "rgba(255,255,255,0.025)";
   for (let y = 0; y < height; y += 4) {
-    textCtx.fillRect(0, y, width, 1);
+    context.fillRect(0, y, width, 1);
   }
-  textCtx.restore();
+  context.restore();
+}
+
+function getMessageBackdrop(board) {
+  const key = [
+    window.innerWidth,
+    window.innerHeight,
+    state.dpr,
+    state.phraseIndex,
+    Math.round(board.panel.x),
+    Math.round(board.panel.y),
+    Math.round(board.panel.width),
+    Math.round(board.panel.height)
+  ].join(":");
+
+  if (state.messageBackdropCanvas && state.messageBackdropKey === key) {
+    return state.messageBackdropCanvas;
+  }
+
+  const backdrop = document.createElement("canvas");
+  backdrop.width = Math.max(1, Math.round(window.innerWidth * state.dpr));
+  backdrop.height = Math.max(1, Math.round(window.innerHeight * state.dpr));
+
+  const backdropCtx = backdrop.getContext("2d");
+  backdropCtx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+  backdropCtx.imageSmoothingEnabled = false;
+  renderMessageBackdrop(backdropCtx, board);
+
+  state.messageBackdropCanvas = backdrop;
+  state.messageBackdropKey = key;
+  return backdrop;
+}
+
+function drawMessageBackdrop(now, board) {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const panel = board.panel;
+  const backdrop = getMessageBackdrop(board);
+
+  textCtx.drawImage(backdrop, 0, 0, backdrop.width, backdrop.height, 0, 0, width, height);
+
+  const sweepWidth = Math.max(120, panel.width * 0.32);
+  const travel = (now * 0.12) % (panel.width + sweepWidth * 2);
+  const sweepX = panel.x - sweepWidth + travel;
+  const sweepGradient = textCtx.createLinearGradient(sweepX - sweepWidth, 0, sweepX + sweepWidth, 0);
+  sweepGradient.addColorStop(0, "rgba(255,255,255,0)");
+  sweepGradient.addColorStop(0.5, "rgba(255,214,138,0.08)");
+  sweepGradient.addColorStop(1, "rgba(255,255,255,0)");
+  textCtx.fillStyle = sweepGradient;
+  textCtx.fillRect(panel.x - 24, panel.y - 18, panel.width + 48, panel.height + 36);
 }
 
 function drawLedBoard(board, progress, now) {
@@ -964,12 +1005,12 @@ function drawLedBoard(board, progress, now) {
   drawMessageBackdrop(now, board);
 
   const { panel, leds, activeIndices } = board;
-  const litCount = Math.floor(activeIndices.length * progress);
-  const pulse = 0.94 + Math.sin(now / 220) * 0.06;
+  const visibility = Math.max(0, Math.min(1, progress));
+  const pulse = (0.94 + Math.sin(now / 220) * 0.06) * visibility;
 
   textCtx.save();
   drawRoundedRect(textCtx, panel.x, panel.y, panel.width, panel.height, 28);
-  textCtx.fillStyle = "rgba(7, 13, 36, 0.9)";
+  textCtx.fillStyle = `rgba(7, 13, 36, ${0.76 + visibility * 0.14})`;
   textCtx.fill();
   textCtx.strokeStyle = "rgba(255,255,255,0.1)";
   textCtx.lineWidth = 1;
@@ -990,21 +1031,21 @@ function drawLedBoard(board, progress, now) {
     textCtx.fill();
   });
 
-  for (let index = 0; index < litCount; index += 1) {
+  for (let index = 0; index < activeIndices.length; index += 1) {
     const led = leds[activeIndices[index]];
     textCtx.beginPath();
-    textCtx.arc(led.x, led.y, board.radius * 1.85, 0, Math.PI * 2);
-    textCtx.fillStyle = `rgba(255, 111, 175, ${0.12 * pulse})`;
+    textCtx.arc(led.x, led.y, board.radius * (1.1 + visibility * 0.75), 0, Math.PI * 2);
+    textCtx.fillStyle = `rgba(255, 111, 175, ${0.14 * pulse})`;
     textCtx.fill();
 
     textCtx.beginPath();
-    textCtx.arc(led.x, led.y, board.radius * 1.08, 0, Math.PI * 2);
+    textCtx.arc(led.x, led.y, board.radius * (0.55 + visibility * 0.53), 0, Math.PI * 2);
     textCtx.fillStyle = `rgba(255, 126, 186, ${0.96 * pulse})`;
     textCtx.fill();
 
     textCtx.beginPath();
-    textCtx.arc(led.x, led.y, board.radius * 0.44, 0, Math.PI * 2);
-    textCtx.fillStyle = "#fff6fb";
+    textCtx.arc(led.x, led.y, board.radius * (0.22 + visibility * 0.22), 0, Math.PI * 2);
+    textCtx.fillStyle = `rgba(255, 246, 251, ${0.18 + visibility * 0.82})`;
     textCtx.fill();
   }
 }
@@ -1012,10 +1053,13 @@ function drawLedBoard(board, progress, now) {
 function animateLedPhrase(message) {
   cancelMessageFrame();
   state.currentBoard = createLedBoard(message);
+  invalidateMessageBackdrop();
 
   return new Promise((resolve) => {
-    const turnOnDuration = 960;
-    const holdDuration = 2500 + Math.min(3400, state.currentBoard.message.length * 95);
+    const turnOnDuration = 320;
+    const holdDuration = 2250 + Math.min(2400, state.currentBoard.message.length * 78);
+    const fadeOutDuration = 180;
+    const totalDuration = turnOnDuration + holdDuration + fadeOutDuration;
     const start = performance.now();
     let pausedAt = null;
     let pausedDuration = 0;
@@ -1036,11 +1080,15 @@ function animateLedPhrase(message) {
       }
 
       const elapsed = now - start - pausedDuration;
-      const progress = Math.min(1, elapsed / turnOnDuration);
+      const turnOnProgress = Math.min(1, elapsed / turnOnDuration);
+      const fadeOutProgress = elapsed <= turnOnDuration + holdDuration
+        ? 1
+        : 1 - Math.min(1, (elapsed - turnOnDuration - holdDuration) / fadeOutDuration);
+      const progress = Math.max(0, Math.min(turnOnProgress, fadeOutProgress));
 
       drawLedBoard(state.currentBoard, progress, now);
 
-      if (elapsed < turnOnDuration + holdDuration) {
+      if (elapsed < totalDuration) {
         state.messageFrame = window.requestAnimationFrame(frame);
         return;
       }
@@ -1063,7 +1111,7 @@ async function startMessageSequence() {
   for (let index = 0; index < phrases.length; index += 1) {
     state.phraseIndex = index;
     await animateLedPhrase(phrases[index]);
-    await wait(420);
+    await wait(120);
   }
 
   cancelMessageFrame();

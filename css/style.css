@@ -386,6 +386,12 @@ margin-bottom:8px;
 font-size:clamp(1.9rem, 8vw, 3.1rem);
 line-height:1;
 margin-bottom:10px;
+color:#ffd878;
+background:linear-gradient(90deg, #ffd878 0%, #ff94c0 52%, #ff6f97 100%);
+-webkit-background-clip:text;
+background-clip:text;
+-webkit-text-fill-color:transparent;
+text-shadow:0 0 18px rgba(255,120,171,0.14);
 }
 
 .album-header p{
@@ -673,6 +679,7 @@ transition:opacity 420ms ease, transform 420ms ease;
 z-index:2;
 overflow:visible;
 pointer-events:none;
+contain:paint;
 }
 
 .heart-layer{
@@ -683,7 +690,8 @@ width:100%;
 height:100%;
 overflow:visible;
 transform-origin:center center;
-opacity:0.98;
+opacity:0;
+will-change:transform, opacity;
 }
 
 .heart-layer .heart-ring{
@@ -692,8 +700,6 @@ stroke:var(--heart-stroke, #ff9a6d);
 stroke-width:5.5;
 stroke-linecap:round;
 stroke-linejoin:round;
-stroke-dasharray:820;
-stroke-dashoffset:820;
 filter:
 drop-shadow(0 0 8px var(--heart-glow, rgba(255,92,138,0.4)))
 drop-shadow(0 0 18px var(--heart-glow-strong, rgba(255,72,123,0.22)));
@@ -707,35 +713,40 @@ opacity:0.8;
 --heart-stroke:#ff9bb6;
 --heart-glow:rgba(255,155,182,0.5);
 --heart-glow-strong:rgba(255,91,140,0.24);
-transform:scale(0.52);
+--heart-scale:0.52;
+transform:scale(var(--heart-scale));
 }
 
 .heart-layer-2{
 --heart-stroke:#ff5c8a;
 --heart-glow:rgba(255,92,138,0.48);
 --heart-glow-strong:rgba(255,69,111,0.26);
-transform:scale(0.68);
+--heart-scale:0.68;
+transform:scale(var(--heart-scale));
 }
 
 .heart-layer-3{
 --heart-stroke:#ff86aa;
 --heart-glow:rgba(255,134,170,0.5);
 --heart-glow-strong:rgba(255,86,140,0.24);
-transform:scale(0.84);
+--heart-scale:0.84;
+transform:scale(var(--heart-scale));
 }
 
 .heart-layer-4{
 --heart-stroke:#ff3f72;
 --heart-glow:rgba(255,63,114,0.54);
 --heart-glow-strong:rgba(255,61,124,0.32);
-transform:scale(1);
+--heart-scale:1;
+transform:scale(var(--heart-scale));
 }
 
 .heart-layer-5{
 --heart-stroke:#ff6ca0;
 --heart-glow:rgba(255,108,160,0.56);
 --heart-glow-strong:rgba(255,74,134,0.3);
-transform:scale(1.16);
+--heart-scale:1.16;
+transform:scale(var(--heart-scale));
 }
 
 .final-scene.show-heart .heart-bloom{
@@ -743,23 +754,30 @@ opacity:1;
 transform:translate(-50%, -50%) scale(1);
 }
 
-.final-scene.show-heart .heart-layer .heart-ring{
-stroke-dashoffset:0;
-animation:drawHeart 1.9s ease forwards;
+.final-scene.show-heart .heart-layer{
+opacity:1;
+transform:scale(var(--heart-scale));
+animation:heartLayerEnter 620ms cubic-bezier(.22,.82,.22,1) forwards;
 }
 
-.final-scene.show-heart .heart-layer-1 .heart-ring{animation-delay:0.02s;}
-.final-scene.show-heart .heart-layer-2 .heart-ring{animation-delay:0.18s;}
-.final-scene.show-heart .heart-layer-3 .heart-ring{animation-delay:0.34s;}
-.final-scene.show-heart .heart-layer-4 .heart-ring{animation-delay:0.5s;}
-.final-scene.show-heart .heart-layer-5 .heart-ring{animation-delay:0.66s;}
+.final-scene.show-heart .heart-layer-1{animation-delay:0.02s;}
+.final-scene.show-heart .heart-layer-2{animation-delay:0.14s;}
+.final-scene.show-heart .heart-layer-3{animation-delay:0.26s;}
+.final-scene.show-heart .heart-layer-4{animation-delay:0.38s;}
+.final-scene.show-heart .heart-layer-5{animation-delay:0.5s;}
 
-@keyframes drawHeart{
-from{
-stroke-dashoffset:820;
+@keyframes heartLayerEnter{
+0%{
+opacity:0;
+transform:scale(calc(var(--heart-scale) * 0.78));
 }
-to{
-stroke-dashoffset:0;
+70%{
+opacity:1;
+transform:scale(calc(var(--heart-scale) * 1.03));
+}
+100%{
+opacity:1;
+transform:scale(var(--heart-scale));
 }
 }
 
@@ -1003,12 +1021,27 @@ min-height:0;
 .beat-lines{
 top:37%;
 width:min(70vw, 330px);
+filter:
+drop-shadow(0 0 10px rgba(255,82,128,0.18))
+drop-shadow(0 0 18px rgba(255,70,116,0.08));
+}
+
+.beat-lines path{
+stroke-width:4.8;
+}
+
+.beat-lines .beat-line-base{
+stroke-width:3.2;
+}
+
+.beat-lines .beat-line-trace{
+animation-duration:3.1s;
 }
 
 .heart-bloom{
-top:37%;
-width:min(58vw, 250px);
-height:min(50vw, 214px);
+top:38%;
+width:min(54vw, 224px);
+height:min(46vw, 188px);
 }
 
 .heart-caption{
@@ -1016,5 +1049,12 @@ bottom:calc(6px + env(safe-area-inset-bottom, 0px));
 width:min(78%, 340px);
 font-size:clamp(0.8rem, 2.2vw, 0.96rem);
 padding:8px 14px;
+}
+
+.heart-layer .heart-ring{
+stroke-width:4.4;
+filter:
+drop-shadow(0 0 5px var(--heart-glow, rgba(255,92,138,0.34)))
+drop-shadow(0 0 10px var(--heart-glow-strong, rgba(255,72,123,0.16)));
 }
 }

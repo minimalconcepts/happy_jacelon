@@ -72,7 +72,7 @@ const phrases = [
   "Como un|Lamborghini Veneno",
   "Tan querida|como el rally",
   "Tan hermosa|como un Porsche 912",
-  "Mirada fina|tipo Koenigsegg",
+  "Mirada fina|como Koenigsegg",
   "Corazon tierno|como un Miata",
   "Gracias|por ser tu",
   "Te amamos|como eres"
@@ -1351,6 +1351,20 @@ function createPlaceholderDataUri(index) {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
+function tryAlternateImageSource(image, index) {
+  const baseName = `foto${index + 1}`;
+  const extensions = ["jpeg", "jpg", "png", "webp"];
+  const attempted = image.dataset.extAttempt ? Number(image.dataset.extAttempt) : 0;
+
+  if (attempted >= extensions.length) {
+    return false;
+  }
+
+  image.dataset.extAttempt = String(attempted + 1);
+  image.src = `assets/images/${baseName}.${extensions[attempted]}`;
+  return true;
+}
+
 function applyPlaceholderImage(image, index) {
   if (image.dataset.placeholderApplied === "1") {
     return;
@@ -1363,13 +1377,19 @@ function applyPlaceholderImage(image, index) {
 
 function wireImageFallbacks() {
   albumImages.forEach((image, index) => {
-    const handleMissing = () => applyPlaceholderImage(image, index);
+    const handleMissing = () => {
+      if (tryAlternateImageSource(image, index)) {
+        return;
+      }
+
+      applyPlaceholderImage(image, index);
+    };
 
     if (image.complete && (!image.naturalWidth || image.naturalWidth === 0)) {
       handleMissing();
     }
 
-    image.addEventListener("error", handleMissing, { once: true });
+    image.addEventListener("error", handleMissing);
   });
 }
 

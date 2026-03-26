@@ -522,10 +522,10 @@ content:"";
 position:absolute;
 inset:0;
 background:
-radial-gradient(circle at 50% 24%, rgba(255,160,94,0.22), transparent 28%),
-radial-gradient(circle at 52% 76%, rgba(255,94,166,0.16), transparent 24%),
-radial-gradient(circle at 24% 56%, rgba(255,217,112,0.08), transparent 26%),
-linear-gradient(180deg, rgba(24,18,40,0.97), rgba(12,8,24,0.99) 72%);
+radial-gradient(circle at 50% 28%, rgba(255,67,112,0.14), transparent 24%),
+radial-gradient(circle at 22% 58%, rgba(255,255,255,0.08), transparent 22%),
+radial-gradient(circle at 78% 46%, rgba(255,255,255,0.06), transparent 20%),
+linear-gradient(180deg, rgba(28,30,35,0.98), rgba(8,8,10,0.995) 42%, rgba(18,20,24,0.99) 100%);
 }
 
 .final-scene.is-visible{
@@ -552,7 +552,7 @@ content:"";
 position:absolute;
 inset:0;
 background:
-linear-gradient(180deg, rgba(32,21,47,0.98), rgba(13,9,24,0.99));
+linear-gradient(180deg, rgba(46,48,54,0.97), rgba(9,9,11,0.99));
 z-index:0;
 }
 
@@ -597,7 +597,7 @@ overflow:hidden;
 border-radius:16px;
 border:1px solid rgba(255,255,255,0.14);
 background:
-linear-gradient(160deg, rgba(255,77,166,0.18), rgba(255,193,103,0.12)),
+linear-gradient(160deg, rgba(255,88,140,0.14), rgba(228,231,238,0.12)),
 rgba(255,255,255,0.06);
 box-shadow:0 12px 28px rgba(0,0,0,0.28);
 z-index:1;
@@ -631,7 +631,9 @@ width:min(76vw, 470px);
 transform:translate(-50%, -50%);
 opacity:0;
 z-index:1;
-filter:drop-shadow(0 0 18px rgba(255,166,112,0.22));
+filter:
+drop-shadow(0 0 14px rgba(255,82,128,0.24))
+drop-shadow(0 0 28px rgba(255,70,116,0.1));
 transition:opacity 420ms ease;
 }
 
@@ -643,12 +645,12 @@ stroke-linejoin:round;
 }
 
 .beat-lines .beat-line-base{
-stroke:rgba(255,205,132,0.22);
+stroke:rgba(205,212,224,0.26);
 stroke-width:4;
 }
 
 .beat-lines .beat-line-trace{
-stroke:#ff8a73;
+stroke:#ff4f85;
 stroke-dasharray:92 448;
 stroke-dashoffset:540;
 opacity:0.94;
@@ -687,12 +689,14 @@ opacity:0.98;
 .heart-layer .heart-ring{
 fill:none;
 stroke:var(--heart-stroke, #ff9a6d);
-stroke-width:6;
+stroke-width:5.5;
 stroke-linecap:round;
 stroke-linejoin:round;
 stroke-dasharray:820;
 stroke-dashoffset:820;
-filter:drop-shadow(0 0 16px var(--heart-glow, rgba(255,166,109,0.22)));
+filter:
+drop-shadow(0 0 8px var(--heart-glow, rgba(255,92,138,0.4)))
+drop-shadow(0 0 18px var(--heart-glow-strong, rgba(255,72,123,0.22)));
 }
 
 .final-scene.show-heart .beat-lines{
@@ -700,32 +704,37 @@ opacity:0.8;
 }
 
 .heart-layer-1{
---heart-stroke:#fff0a6;
---heart-glow:rgba(255,240,166,0.24);
+--heart-stroke:#ff9bb6;
+--heart-glow:rgba(255,155,182,0.5);
+--heart-glow-strong:rgba(255,91,140,0.24);
 transform:scale(0.52);
 }
 
 .heart-layer-2{
---heart-stroke:#ffcf79;
---heart-glow:rgba(255,207,121,0.24);
+--heart-stroke:#ff5c8a;
+--heart-glow:rgba(255,92,138,0.48);
+--heart-glow-strong:rgba(255,69,111,0.26);
 transform:scale(0.68);
 }
 
 .heart-layer-3{
---heart-stroke:#ff9f7a;
---heart-glow:rgba(255,159,122,0.24);
+--heart-stroke:#ff86aa;
+--heart-glow:rgba(255,134,170,0.5);
+--heart-glow-strong:rgba(255,86,140,0.24);
 transform:scale(0.84);
 }
 
 .heart-layer-4{
---heart-stroke:#ff6fa6;
---heart-glow:rgba(255,111,166,0.24);
+--heart-stroke:#ff3f72;
+--heart-glow:rgba(255,63,114,0.54);
+--heart-glow-strong:rgba(255,61,124,0.32);
 transform:scale(1);
 }
 
 .heart-layer-5{
---heart-stroke:#ffb86b;
---heart-glow:rgba(255,184,107,0.28);
+--heart-stroke:#ff6ca0;
+--heart-glow:rgba(255,108,160,0.56);
+--heart-glow-strong:rgba(255,74,134,0.3);
 transform:scale(1.16);
 }
 
@@ -777,23 +786,24 @@ letter-spacing:0.015em;
 line-height:1.42;
 color:#fff8fd;
 text-shadow:
-0 0 18px rgba(255,141,107,0.22),
-0 0 24px rgba(255,99,170,0.14),
-0 0 30px rgba(255,205,111,0.18);
+0 0 10px rgba(255,91,140,0.2),
+0 0 22px rgba(255,70,116,0.16),
+0 0 26px rgba(255,255,255,0.08);
 opacity:0;
 transition:opacity 420ms ease, transform 420ms ease;
 pointer-events:none;
 z-index:10;
 background:
-radial-gradient(circle at top, rgba(255,255,255,0.16), transparent 62%),
-linear-gradient(90deg, rgba(255,166,111,0.22), rgba(255,102,168,0.16), rgba(255,214,120,0.18));
+radial-gradient(circle at top, rgba(255,255,255,0.18), transparent 62%),
+linear-gradient(90deg, rgba(88,92,104,0.56), rgba(22,22,28,0.88), rgba(70,74,84,0.52));
 padding:12px 24px;
-border:1px solid rgba(255,255,255,0.16);
+border:1px solid rgba(255,130,172,0.28);
 border-radius:22px;
 backdrop-filter:blur(10px);
 box-shadow:
 0 14px 32px rgba(0,0,0,0.26),
-0 0 0 1px rgba(255,255,255,0.04) inset;
+0 0 0 1px rgba(255,255,255,0.06) inset,
+0 0 18px rgba(255,84,132,0.12);
 }
 
 .heart-caption.is-visible{

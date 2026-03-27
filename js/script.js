@@ -67,15 +67,15 @@ const ledFont = {
 
 const ledWords = ["HAPPY", "BIRTHDAY", "BESTY"];
 const phrases = [
-  "Eres tan encantadora",
-  "Eres tan unica|y especial",
-  "Como un|Lamborghini Veneno",
-  "Tan querida|como el rally",
-  "Tan hermosa|como un Porsche 912",
-  "Mirada fina|como Koenigsegg",
-  "Corazon tierno|como un Miata",
-  "Gracias|por ser tu",
-  "Te amamos|como eres"
+  "Eres muy|hermosa",
+  "Tu sonrisa|es preciosa",
+  "Tienes una luz|bien bonita",
+  "Eres una persona|increible",
+  "Siempre eres|buena gente",
+  "Tu corazon|es muy noble",
+  "Tu amistad|es muy valiosa",
+  "Eres importante|para mi",
+  "Gracias por ser|mi mejor amiga"
 ];
 const lyricBackdropLines = [
   "feliz cumpleanos besty",
@@ -334,6 +334,21 @@ function approveLaunch() {
   resolveLaunchWaiters();
 }
 
+async function startMusicFromGesture() {
+  if (!soundtrack || state.musicMissing || state.musicPlaying) {
+    return;
+  }
+
+  try {
+    await soundtrack.play();
+    state.musicPlaying = true;
+  } catch (error) {
+    state.musicPlaying = false;
+  }
+
+  updateMusicToggle();
+}
+
 function setupLaunchPrompt() {
   if (!launchPrompt || !startExperience) {
     state.launchApproved = true;
@@ -349,7 +364,10 @@ function setupLaunchPrompt() {
   }
 
   launchPrompt.classList.add("is-visible");
-  startExperience.addEventListener("click", approveLaunch);
+  startExperience.addEventListener("click", async () => {
+    approveLaunch();
+    await startMusicFromGesture();
+  });
 }
 
 function setCanvasLayers({ matrixVisible, textVisible }) {
@@ -368,10 +386,12 @@ function updateMusicToggle() {
 
   if (state.musicMissing) {
     musicToggle.textContent = "Agregar cancion";
+    musicToggle.setAttribute("aria-label", "Agregar cancion");
     return;
   }
 
   musicToggle.textContent = state.musicPlaying ? "Pausar musica" : "Musica";
+  musicToggle.setAttribute("aria-label", state.musicPlaying ? "Pausar musica" : "Musica");
 }
 
 async function toggleMusic() {
@@ -447,9 +467,12 @@ function updateFullscreenToggle() {
   }
 
   const supported = Boolean(document.fullscreenEnabled && document.documentElement.requestFullscreen);
+  const isFullscreen = Boolean(document.fullscreenElement);
   fullscreenToggle.classList.toggle("is-hidden", !supported);
-  fullscreenToggle.classList.toggle("is-active", Boolean(document.fullscreenElement));
-  fullscreenToggle.textContent = document.fullscreenElement ? "Salir pantalla" : "Pantalla completa";
+  fullscreenToggle.classList.toggle("is-active", isFullscreen);
+  fullscreenToggle.classList.toggle("is-compact", isFullscreen);
+  fullscreenToggle.textContent = isFullscreen ? "Salir pantalla completa" : "Pantalla completa";
+  fullscreenToggle.setAttribute("aria-label", isFullscreen ? "Salir pantalla completa" : "Pantalla completa");
 }
 
 async function toggleFullscreen() {

@@ -248,6 +248,16 @@ background:rgba(20,13,38,0.86);
 border-color:rgba(255,193,103,0.38);
 }
 
+.fullscreen-toggle.is-compact{
+width:44px;
+min-width:44px;
+padding:10px;
+justify-content:center;
+gap:0;
+font-size:0;
+letter-spacing:0;
+}
+
 .fullscreen-toggle.is-hidden{
 opacity:0;
 pointer-events:none;
@@ -528,10 +538,11 @@ content:"";
 position:absolute;
 inset:0;
 background:
-radial-gradient(circle at 50% 28%, rgba(255,67,112,0.14), transparent 24%),
-radial-gradient(circle at 22% 58%, rgba(255,255,255,0.08), transparent 22%),
-radial-gradient(circle at 78% 46%, rgba(255,255,255,0.06), transparent 20%),
-linear-gradient(180deg, rgba(28,30,35,0.98), rgba(8,8,10,0.995) 42%, rgba(18,20,24,0.99) 100%);
+radial-gradient(circle at 50% 22%, rgba(255,86,150,0.22), transparent 22%),
+radial-gradient(circle at 18% 72%, rgba(255,186,82,0.16), transparent 22%),
+radial-gradient(circle at 82% 34%, rgba(120,152,255,0.12), transparent 18%),
+radial-gradient(circle at 50% 84%, rgba(255,94,128,0.1), transparent 26%),
+linear-gradient(180deg, rgba(45,19,60,0.98), rgba(9,10,18,0.995) 42%, rgba(28,10,34,0.99) 100%);
 }
 
 .final-scene.is-visible{
@@ -904,6 +915,12 @@ height:8px;
 .fullscreen-toggle::before{
 width:10px;
 height:10px;
+}
+
+.fullscreen-toggle.is-compact{
+width:38px;
+min-width:38px;
+padding:8px;
 }
 
 .launch-card{

@@ -17,6 +17,7 @@ const finalScene = document.getElementById("finalScene");
 const curtainTop = document.getElementById("curtainTop");
 const curtainBottom = document.getElementById("curtainBottom");
 const heartCaption = document.getElementById("heartCaption");
+const poemLetter = document.getElementById("poemLetter");
 const albumCards = Array.from(document.querySelectorAll(".memory-card"));
 const albumImages = Array.from(document.querySelectorAll(".photo"));
 const debugParams = new URLSearchParams(window.location.search);
@@ -1190,7 +1191,11 @@ async function playFinalScene() {
   album.classList.add("is-heart-mode");
   albumTrack.classList.add("is-locked", "is-hidden");
   buildCurtains();
-  finalScene.classList.remove("is-opening", "is-closing", "show-heart", "show-beat");
+  if (poemLetter) {
+    poemLetter.scrollTop = 0;
+    poemLetter.classList.remove("is-visible");
+  }
+  finalScene.classList.remove("is-opening", "is-closing", "show-heart", "show-beat", "show-letter");
   finalScene.classList.add("is-visible");
   heartCaption.classList.remove("is-visible");
 
@@ -1214,6 +1219,13 @@ async function playFinalScene() {
   finalScene.classList.add("show-heart");
   heartCaption.classList.add("is-visible");
   setAlbumMessage("", "");
+
+  await wait(2400);
+  heartCaption.classList.remove("is-visible");
+  finalScene.classList.add("show-letter");
+  if (poemLetter) {
+    poemLetter.classList.add("is-visible");
+  }
 }
 
 async function startAlbumCountdown() {
@@ -1307,7 +1319,7 @@ function showAlbum() {
   album.classList.remove("is-heart-mode");
   albumTrack.classList.remove("is-locked", "is-heart-mode", "is-hidden");
   albumTrack.scrollLeft = 0;
-  finalScene.classList.remove("is-visible", "is-closing", "is-opening", "show-heart");
+  finalScene.classList.remove("is-visible", "is-closing", "is-opening", "show-heart", "show-letter");
   finalScene.classList.remove("show-beat");
   curtainTop.style.removeProperty("transform");
   curtainBottom.style.removeProperty("transform");
@@ -1316,6 +1328,10 @@ function showAlbum() {
   curtainTop.innerHTML = "";
   curtainBottom.innerHTML = "";
   heartCaption.classList.remove("is-visible");
+  if (poemLetter) {
+    poemLetter.scrollTop = 0;
+    poemLetter.classList.remove("is-visible");
+  }
   setAlbumMessage("", "");
   album.classList.add("is-visible");
   state.phase = "album";

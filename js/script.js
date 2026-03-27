@@ -1173,13 +1173,14 @@ function clearAlbumTimer() {
 function buildCurtains() {
   curtainTop.innerHTML = "";
   curtainBottom.innerHTML = "";
+  const splitIndex = Math.ceil(albumCards.length / 2);
 
   albumCards.forEach((card, index) => {
     const tile = card.cloneNode(true);
     tile.classList.remove("memory-card");
     tile.classList.add("curtain-card");
 
-    if (index < 10) {
+    if (index < splitIndex) {
       curtainTop.appendChild(tile);
     } else {
       curtainBottom.appendChild(tile);

@@ -17,6 +17,7 @@ const finalScene = document.getElementById("finalScene");
 const curtainTop = document.getElementById("curtainTop");
 const curtainBottom = document.getElementById("curtainBottom");
 const heartCaption = document.getElementById("heartCaption");
+const mailPrompt = document.getElementById("mailPrompt");
 const poemLetter = document.getElementById("poemLetter");
 const albumCards = Array.from(document.querySelectorAll(".memory-card"));
 const albumImages = Array.from(document.querySelectorAll(".photo"));
@@ -1195,7 +1196,7 @@ async function playFinalScene() {
     poemLetter.scrollTop = 0;
     poemLetter.classList.remove("is-visible");
   }
-  finalScene.classList.remove("is-opening", "is-closing", "show-heart", "show-beat", "show-letter");
+  finalScene.classList.remove("is-opening", "is-closing", "show-heart", "show-beat", "show-letter", "show-mail");
   finalScene.classList.add("is-visible");
   heartCaption.classList.remove("is-visible");
 
@@ -1220,7 +1221,13 @@ async function playFinalScene() {
   heartCaption.classList.add("is-visible");
   setAlbumMessage("", "");
 
-  await wait(2400);
+  await wait(1500);
+  if (mailPrompt) {
+    finalScene.classList.add("show-mail");
+  }
+
+  await wait(1550);
+  finalScene.classList.remove("show-mail");
   heartCaption.classList.remove("is-visible");
   finalScene.classList.add("show-letter");
   if (poemLetter) {
@@ -1282,6 +1289,21 @@ function showFinalDebugState() {
   setAlbumMessage("", "");
 }
 
+function showMailDebugState() {
+  showAlbum();
+  state.albumHeartMode = true;
+  album.classList.add("is-heart-mode");
+  albumTrack.classList.add("is-locked", "is-hidden");
+  buildCurtains();
+  finalScene.classList.add("is-visible", "show-beat", "show-heart", "show-mail", "is-opening");
+  curtainTop.style.transform = "translateY(-240%)";
+  curtainBottom.style.transform = "translateY(240%)";
+  curtainTop.style.opacity = "0";
+  curtainBottom.style.opacity = "0";
+  heartCaption.classList.add("is-visible");
+  setAlbumMessage("", "");
+}
+
 function runDebugStage() {
   if (debugStage === "album") {
     showAlbum();
@@ -1298,6 +1320,11 @@ function runDebugStage() {
 
   if (debugStage === "heart-static") {
     showFinalDebugState();
+    return;
+  }
+
+  if (debugStage === "mail-static") {
+    showMailDebugState();
     return;
   }
 
@@ -1319,7 +1346,7 @@ function showAlbum() {
   album.classList.remove("is-heart-mode");
   albumTrack.classList.remove("is-locked", "is-heart-mode", "is-hidden");
   albumTrack.scrollLeft = 0;
-  finalScene.classList.remove("is-visible", "is-closing", "is-opening", "show-heart", "show-letter");
+  finalScene.classList.remove("is-visible", "is-closing", "is-opening", "show-heart", "show-letter", "show-mail");
   finalScene.classList.remove("show-beat");
   curtainTop.style.removeProperty("transform");
   curtainBottom.style.removeProperty("transform");
